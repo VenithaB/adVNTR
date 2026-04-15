@@ -12,6 +12,9 @@ SRCS = $(wildcard filtering/*.cc)
 OBJS = $(foreach OBJ,$(SRCS:.cc=.o),$(OBJDIR)/$(OBJ))
 DEPS = $(wildcard *.h)
 
+# Python source directories (pomegranate/ is Cython and excluded from linting)
+PY_DIRS = advntr/ tests/
+
 $(OBJDIR):
 		if [ ! -d $(OBJDIR) ]; then mkdir $(OBJDIR); fi
 
@@ -23,11 +26,36 @@ all: $(OBJDIR) adVNTR-Filtering
 adVNTR-Filtering: $(OBJS)
 		$(CXX) -o $@ $^ $(LDFLAGS)
 
-.PHONY: clean
-.PHONY: all
-.PHONY: archive
-.PHONY: install
-.PHONY: uninstall
+# -----------------------------------------------------------------------
+# Python validation — run in order: format → lint → typecheck → test
+# -----------------------------------------------------------------------
+
+.PHONY: check format lint typecheck test
+
+## Run the full validation pipeline in the required order
+check: format lint typecheck test
+
+## Auto-format with black
+format:
+		black $(PY_DIRS)
+
+## Check code quality with flake8
+lint:
+		flake8 $(PY_DIRS)
+
+## Type-check with mypy
+typecheck:
+		mypy $(PY_DIRS)
+
+## Run tests with pytest and coverage
+test:
+		pytest --cov=advntr --cov-report=term-missing tests/
+
+# -----------------------------------------------------------------------
+# C++ build targets
+# -----------------------------------------------------------------------
+
+.PHONY: clean all archive install uninstall
 
 clean:
 		rm -f *~ $(OBJDIR)/*.o filtering/*.o adVNTR-Filtering
