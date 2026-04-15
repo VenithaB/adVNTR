@@ -7,7 +7,7 @@ from advntr.vntr_finder import VNTRFinder
 class TestGenotyping(unittest.TestCase):
 
     def get_reference_vntr(self):
-        ref_vntr = ReferenceVNTR(1, 'CACA', 1000, 'chr1', None, None)
+        ref_vntr = ReferenceVNTR(1, "CACA", 1000, "chr1", None, None)
         return ref_vntr
 
     def test_statistical_model_for_haploid_case(self):
@@ -29,7 +29,9 @@ class TestGenotyping(unittest.TestCase):
 
     def test_statistical_model_for_erroneous_diploid_case(self):
         vntr_finder = VNTRFinder(self.get_reference_vntr())
-        genotype = vntr_finder.find_genotype_based_on_observed_repeats([4, 5, 5, 5, 7, 8, 8, 8, 9])
+        genotype = vntr_finder.find_genotype_based_on_observed_repeats(
+            [4, 5, 5, 5, 7, 8, 8, 8, 9]
+        )
         if genotype[0] > genotype[1]:
             genotype = (genotype[1], genotype[0])
         self.assertEqual(genotype, (5, 8))
@@ -40,5 +42,7 @@ class TestGenotyping(unittest.TestCase):
         vpath = []
         min_score_to_count_read = -50
         read_length = 100
-        results = vntr_finder.recruit_read(logp, vpath, min_score_to_count_read, read_length)
+        results = vntr_finder.recruit_read(
+            logp, vpath, min_score_to_count_read, read_length
+        )
         self.assertEqual(results, True)

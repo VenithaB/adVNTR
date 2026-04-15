@@ -1,5 +1,3 @@
-
-
 def clusters_dist(c1, c2, distance_matrix):
     dist = 0
     for seq1 in c1:
@@ -29,6 +27,6 @@ def hierarchical_clustering(k, distance_matrix):
         closest = find_closest_clusters(clusters, distance_matrix)
         new_cluster = clusters[closest[0]] + clusters[closest[1]]
         clusters.append(new_cluster)
-        clusters = clusters[:closest[1]] + clusters[closest[1]+1:]
-        clusters = clusters[:closest[0]] + clusters[closest[0]+1:]
+        clusters = clusters[: closest[1]] + clusters[closest[1] + 1 :]
+        clusters = clusters[: closest[0]] + clusters[closest[0] + 1 :]
     return clusters

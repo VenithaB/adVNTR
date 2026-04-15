@@ -1,12 +1,25 @@
 from Bio import pairwise2
 
-from advntr.hmm_utils import build_reference_repeat_finder_hmm, get_repeat_segments_from_visited_states_and_region
+from advntr.hmm_utils import (
+    build_reference_repeat_finder_hmm,
+    get_repeat_segments_from_visited_states_and_region,
+)
 from advntr.utils import get_chromosome_reference_sequence
 
 
 class ReferenceVNTR:
-    def __init__(self, vntr_id, pattern, start_point, chromosome, gene_name, annotation, estimated_repeats=None,
-                 chromosome_sequence=None, scaled_score=0):
+    def __init__(
+        self,
+        vntr_id,
+        pattern,
+        start_point,
+        chromosome,
+        gene_name,
+        annotation,
+        estimated_repeats=None,
+        chromosome_sequence=None,
+        scaled_score=0,
+    ):
         self.non_overlapping = True
         self.has_homologous = False
         self.id = vntr_id
@@ -26,35 +39,41 @@ class ReferenceVNTR:
         if not isinstance(other, ReferenceVNTR):
             return False
         # Not checking has_homologous for equality.
-        return (self.non_overlapping == other.non_overlapping and
-                self.id == other.id and
-                self.pattern == other.pattern and
-                self.start_point == other.start_point and
-                self.chromosome == other.chromosome and
-                self.gene_name == other.gene_name and
-                self.annotation == other.annotation and
-                self.estimated_repeats == other.estimated_repeats and
-                sorted(self.repeat_segments) == sorted(other.repeat_segments) and
-                self.left_flanking_region == other.left_flanking_region and
-                self.right_flanking_region == other.right_flanking_region and
-                self.chromosome_sequence == other.chromosome_sequence and
-                self.scaled_score == other.scaled_score)
+        return (
+            self.non_overlapping == other.non_overlapping
+            and self.id == other.id
+            and self.pattern == other.pattern
+            and self.start_point == other.start_point
+            and self.chromosome == other.chromosome
+            and self.gene_name == other.gene_name
+            and self.annotation == other.annotation
+            and self.estimated_repeats == other.estimated_repeats
+            and sorted(self.repeat_segments) == sorted(other.repeat_segments)
+            and self.left_flanking_region == other.left_flanking_region
+            and self.right_flanking_region == other.right_flanking_region
+            and self.chromosome_sequence == other.chromosome_sequence
+            and self.scaled_score == other.scaled_score
+        )
 
     def init_from_vntrseek_data(self):
         corresponding_region_in_ref = self.get_corresponding_region_in_ref()
         repeat_segments = self.find_repeat_segments(corresponding_region_in_ref)
         self.repeat_segments = repeat_segments
         flanking_region_size = 500
-        self.left_flanking_region, self.right_flanking_region = self.get_flanking_regions(flanking_region_size)
+        self.left_flanking_region, self.right_flanking_region = (
+            self.get_flanking_regions(flanking_region_size)
+        )
         self.chromosome_sequence = None
 
-    def init_from_xml(self, repeat_segments, left_flanking_region, right_flanking_region):
+    def init_from_xml(
+        self, repeat_segments, left_flanking_region, right_flanking_region
+    ):
         self.repeat_segments = repeat_segments
         self.left_flanking_region = left_flanking_region
-        if left_flanking_region == 'None':
+        if left_flanking_region == "None":
             self.left_flanking_region = None
         self.right_flanking_region = right_flanking_region
-        if right_flanking_region == 'None':
+        if right_flanking_region == "None":
             self.right_flanking_region = None
 
     def is_non_overlapping(self):
@@ -70,19 +89,36 @@ class ReferenceVNTR:
         return self.repeat_segments
 
     def is_homologous_vntr(self, another):
-        structure1 = self.left_flanking_region[-20:] + self.pattern + self.right_flanking_region[:20]
-        structure2 = another.left_flanking_region[-20:] + another.pattern + another.right_flanking_region[:20]
-        alignment_score = pairwise2.align.localms(structure1, structure2, 1, -1, -1, -1, score_only=True)
-        if float(alignment_score) / len(structure1) > 0.66 or float(alignment_score) / len(structure2) > 0.66:
+        structure1 = (
+            self.left_flanking_region[-20:]
+            + self.pattern
+            + self.right_flanking_region[:20]
+        )
+        structure2 = (
+            another.left_flanking_region[-20:]
+            + another.pattern
+            + another.right_flanking_region[:20]
+        )
+        alignment_score = pairwise2.align.localms(
+            structure1, structure2, 1, -1, -1, -1, score_only=True
+        )
+        if (
+            float(alignment_score) / len(structure1) > 0.66
+            or float(alignment_score) / len(structure2) > 0.66
+        ):
             return True
         return False
 
     def find_repeat_segments(self, region_in_ref):
         patterns = [self.pattern]
-        model = build_reference_repeat_finder_hmm(patterns, copies=self.estimated_repeats)
+        model = build_reference_repeat_finder_hmm(
+            patterns, copies=self.estimated_repeats
+        )
         logp, path = model.viterbi(region_in_ref)
         visited_states = [state.name for idx, state in path[1:-1]]
-        repeat_segments = get_repeat_segments_from_visited_states_and_region(visited_states, region_in_ref)
+        repeat_segments = get_repeat_segments_from_visited_states_and_region(
+            visited_states, region_in_ref
+        )
 
         return repeat_segments
 
@@ -94,15 +130,21 @@ class ReferenceVNTR:
     def get_corresponding_region_in_ref(self):
         ref_sequence = self.__get_chromosome_reference_sequence()
         estimated_length = int(len(self.pattern) * self.estimated_repeats)
-        corresponding_region_in_ref = ref_sequence[self.start_point:self.start_point + estimated_length].upper()
-        while corresponding_region_in_ref.find('N') != -1:
-            n_index = corresponding_region_in_ref.find('N')
+        corresponding_region_in_ref = ref_sequence[
+            self.start_point : self.start_point + estimated_length
+        ].upper()
+        while corresponding_region_in_ref.find("N") != -1:
+            n_index = corresponding_region_in_ref.find("N")
             corresponding_region_in_ref = corresponding_region_in_ref[:n_index]
         return corresponding_region_in_ref
 
     def get_flanking_regions(self, flanking_region_size=140):
         ref_sequence = self.__get_chromosome_reference_sequence()
-        left_flanking = ref_sequence[self.start_point - flanking_region_size:self.start_point].upper()
+        left_flanking = ref_sequence[
+            self.start_point - flanking_region_size : self.start_point
+        ].upper()
         end_of_repeats = self.start_point + self.get_length()
-        right_flanking = ref_sequence[end_of_repeats:end_of_repeats + flanking_region_size].upper()
+        right_flanking = ref_sequence[
+            end_of_repeats : end_of_repeats + flanking_region_size
+        ].upper()
         return left_flanking, right_flanking

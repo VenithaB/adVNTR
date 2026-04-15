@@ -15,14 +15,14 @@ def get_similarity(s1, s2):
 
 
 def get_nucleotide_map(sequence):
-    n_map = {'A': 0, 'C': 0, 'G': 0, 'T': 0}
+    n_map = {"A": 0, "C": 0, "G": 0, "T": 0}
     for s in sequence:
         n_map[s] += 1
     return n_map
 
 
 def nucleotide_dist(map1, map2):
-    nucleotides = 'ACTG'
+    nucleotides = "ACTG"
     res = 0
     for n in nucleotides:
         res += abs(map1[n] - map2[n])

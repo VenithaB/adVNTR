@@ -10,8 +10,16 @@ from advntr.vntr_finder import GenotypeResult
 
 
 class GenomeAnalyzer:
-    def __init__(self, ref_vntrs, target_vntr_ids, working_dir='./', outfmt='text', is_haploid=False, ref_filename=None,
-                 input_file=None):
+    def __init__(
+        self,
+        ref_vntrs,
+        target_vntr_ids,
+        working_dir="./",
+        outfmt="text",
+        is_haploid=False,
+        ref_filename=None,
+        input_file=None,
+    ):
         self.reference_vntrs = ref_vntrs
         self.target_vntr_ids = target_vntr_ids
         self.working_dir = working_dir
@@ -23,19 +31,25 @@ class GenomeAnalyzer:
         self.vntr_finder = {}
         for ref_vntr in self.reference_vntrs:
             if ref_vntr.id in target_vntr_ids:
-                self.vntr_finder[ref_vntr.id] = VNTRFinder(ref_vntr, is_haploid, ref_filename)
+                self.vntr_finder[ref_vntr.id] = VNTRFinder(
+                    ref_vntr, is_haploid, ref_filename
+                )
 
     def print_genotype(self, vntr_id, genotype_result, encountered_error=False):
-        if self.outfmt == 'bed':
-            self.print_genotype_in_bed_format(vntr_id, genotype_result.copy_numbers, encountered_error)
-        elif self.outfmt == 'vcf':
+        if self.outfmt == "bed":
+            self.print_genotype_in_bed_format(
+                vntr_id, genotype_result.copy_numbers, encountered_error
+            )
+        elif self.outfmt == "vcf":
             self.print_genotype_in_vcf(vntr_id, genotype_result, encountered_error)
         else:
-            self.print_genotype_in_text_format(vntr_id, genotype_result.copy_numbers, encountered_error)
+            self.print_genotype_in_text_format(
+                vntr_id, genotype_result.copy_numbers, encountered_error
+            )
 
     def print_bed_header(self):
-        repeats = 'R' if self.is_haploid else 'R1\tR2'
-        print('#CHROM\tStart\tEnd\tVNTR_ID\tGene\tMotif\tRefCopy\t%s' % repeats)
+        repeats = "R" if self.is_haploid else "R1\tR2"
+        print("#CHROM\tStart\tEnd\tVNTR_ID\tGene\tMotif\tRefCopy\t%s" % repeats)
 
     def print_genotype_in_bed_format(self, vntr_id, copy_numbers, encountered_error):
         chromosome = self.vntr_finder[vntr_id].reference_vntr.chromosome
@@ -48,28 +62,44 @@ class GenomeAnalyzer:
             repeats = "Error"
         else:
             if copy_numbers is None:
-                repeats = 'None' if self.is_haploid else 'None\tNone'
+                repeats = "None" if self.is_haploid else "None\tNone"
             else:
-                repeats = str(copy_numbers[0]) if self.is_haploid else '\t'.join([str(cn) for cn in sorted(copy_numbers)])
-        print('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s' % (chromosome, start, end, vntr_id, gene, motif, ref_copy, repeats))
+                repeats = (
+                    str(copy_numbers[0])
+                    if self.is_haploid
+                    else "\t".join([str(cn) for cn in sorted(copy_numbers)])
+                )
+        print(
+            "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
+            % (chromosome, start, end, vntr_id, gene, motif, ref_copy, repeats)
+        )
 
     def print_vcf_header(self):
         vcf_version = "VCFv4.2"
         from advntr import __version__
+
         print("##fileformat={}".format(vcf_version))
         print("##source=adVNTR ver. {}".format(__version__))
 
-        print('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">')
+        print(
+            '##INFO=<ID=END,Number=1,Type=Integer,Description="End position of variant">'
+        )
         print('##INFO=<ID=VID,Number=1,Type=Integer,Description="VNTR ID">')
         print('##INFO=<ID=RU,Number=1,Type=String,Description="Repeat motif">')
-        print('##INFO=<ID=RC,Number=1,Type=Integer,Description="Reference repeat unit count">')
+        print(
+            '##INFO=<ID=RC,Number=1,Type=Integer,Description="Reference repeat unit count">'
+        )
 
         print('##FILTER=<ID=ERR,Description="Error occurred while genotyping">')
 
         print('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">')
         print('##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">')
-        print('##FORMAT=<ID=SR,Number=1,Type=Integer,Description="Spanning read count">')
-        print('##FORMAT=<ID=FR,Number=1,Type=Integer,Description="Flanking read count">')
+        print(
+            '##FORMAT=<ID=SR,Number=1,Type=Integer,Description="Spanning read count">'
+        )
+        print(
+            '##FORMAT=<ID=FR,Number=1,Type=Integer,Description="Flanking read count">'
+        )
         print('##FORMAT=<ID=ML,Number=1,Type=Float,Description="Maximum likelihood">')
 
         contigs = set()
@@ -78,7 +108,7 @@ class GenomeAnalyzer:
             chromosome = ref_vntr.chromosome[3:]
             contigs.add(chromosome)
         for contig in sorted(list(contigs)):
-            print('##contig=<ID={}>'.format(contig))
+            print("##contig=<ID={}>".format(contig))
 
         sample = self.input_file.strip().split("/")[-1].split(".")[0]
         print("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + sample)
@@ -90,19 +120,19 @@ class GenomeAnalyzer:
         start = vntr.start_point
         end = start + vntr.get_length()
         # ID
-        id = '.'
+        id = "."
         # REF
-        ref = ''.join(vntr.get_repeat_segments())
+        ref = "".join(vntr.get_repeat_segments())
         # ALT
-        alt = ''
+        alt = ""
         consensus_seq = vntr.pattern  # TODO use consensus and confidence
         GT = []
         diff_count = 0
         diff_index = -1
 
         if genotype_result.copy_numbers is None:
-            GT.append('.')
-            GT.append('.')
+            GT.append(".")
+            GT.append(".")
         else:
             for index, copy_number in enumerate(genotype_result.copy_numbers):
                 if copy_number != vntr.estimated_repeats:
@@ -116,16 +146,20 @@ class GenomeAnalyzer:
                     GT.append(0)
 
         if diff_count == 2:
-            alt = consensus_seq * genotype_result.copy_numbers[0] + "," + consensus_seq * genotype_result.copy_numbers[1]
+            alt = (
+                consensus_seq * genotype_result.copy_numbers[0]
+                + ","
+                + consensus_seq * genotype_result.copy_numbers[1]
+            )
         elif diff_count == 1:
             alt = consensus_seq * genotype_result.copy_numbers[diff_index]
         else:
-            alt = '.'
+            alt = "."
 
         # QUAL
-        qual = '.'
+        qual = "."
         # FILTER
-        filter = '.'
+        filter = "."
         if encountered_error:
             filter = "ERR"
 
@@ -134,15 +168,25 @@ class GenomeAnalyzer:
         reference_repeat_pattern = vntr.pattern  # RU
         reference_repeat_count = vntr.estimated_repeats  # RC
 
-        info_cols = "END=" + str(end) + ";VID=" + str(advntr_vntr_ID) + ";RU=" + reference_repeat_pattern +\
-                    ";RC=" + str(reference_repeat_count)
+        info_cols = (
+            "END="
+            + str(end)
+            + ";VID="
+            + str(advntr_vntr_ID)
+            + ";RU="
+            + reference_repeat_pattern
+            + ";RC="
+            + str(reference_repeat_count)
+        )
 
         # FORMAT
         format_cols = "GT:DP:SR:FR:ML"
 
         format_string = ""
         # GT
-        format_string += str(GT[0]) + "/" + str(GT[1]) + ":"  # '/' for unphased, '|' for phased.
+        format_string += (
+            str(GT[0]) + "/" + str(GT[1]) + ":"
+        )  # '/' for unphased, '|' for phased.
         # DP
         format_string += str(genotype_result.recruited_reads_count) + ":"
         # SR
@@ -152,8 +196,20 @@ class GenomeAnalyzer:
         # ML
         format_string += "{0:.4f}".format(genotype_result.maximum_likelihood)
 
-        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(vntr.chromosome, vntr.start_point, id,\
-              ref, alt, qual, filter, info_cols, format_cols, format_string))
+        print(
+            "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                vntr.chromosome,
+                vntr.start_point,
+                id,
+                ref,
+                alt,
+                qual,
+                filter,
+                info_cols,
+                format_cols,
+                format_string,
+            )
+        )
 
     def print_genotype_in_text_format(self, vntr_id, copy_numbers, encountered_error):
         print(vntr_id)
@@ -165,30 +221,41 @@ class GenomeAnalyzer:
             if self.is_haploid:
                 print(copy_numbers[0])
             else:
-                print('/'.join([str(cn) for cn in sorted(copy_numbers)]))
+                print("/".join([str(cn) for cn in sorted(copy_numbers)]))
         else:
-            print('None')
+            print("None")
 
     @time_usage
     def get_filtered_read_ids(self, read_file, illumina=True):
         vntr_read_ids = {}
         reads = []
 
-        keywords_filename = self.working_dir + '/keywords_%s.txt' % os.path.basename(read_file)
-        with open(keywords_filename, 'w') as keywords_file:
+        keywords_filename = self.working_dir + "/keywords_%s.txt" % os.path.basename(
+            read_file
+        )
+        with open(keywords_filename, "w") as keywords_file:
             for vid in self.target_vntr_ids:
-                keywords = self.vntr_finder[vid].get_keywords_for_filtering(illumina, keyword_size=15)
-                keywords_file.write('%s %s\n' % (vid, ' '.join(keywords)))
+                keywords = self.vntr_finder[vid].get_keywords_for_filtering(
+                    illumina, keyword_size=15
+                )
+                keywords_file.write("%s %s\n" % (vid, " ".join(keywords)))
                 vntr_read_ids[vid] = []
 
-        filtering_result = self.working_dir + 'filtering_out_%s.txt' % os.path.basename(read_file)
-        os.system('adVNTR-Filtering %s < %s > %s' % (read_file, keywords_filename, filtering_result))
+        filtering_result = self.working_dir + "filtering_out_%s.txt" % os.path.basename(
+            read_file
+        )
+        os.system(
+            "adVNTR-Filtering %s < %s > %s"
+            % (read_file, keywords_filename, filtering_result)
+        )
         with open(filtering_result) as infile:
             lines = infile.readlines()
             for line in lines:
                 line = line.split()
                 if line[0].isdigit() and line[1].isdigit():
-                    logging.info('filtering selected %s reads for %s' % (line[1], line[0]))
+                    logging.info(
+                        "filtering selected %s reads for %s" % (line[1], line[0])
+                    )
                     vntr_read_ids[int(line[0])] = set(line[2:])
                 else:
                     read = SeqRecord(line[1], line[0])
@@ -207,112 +274,196 @@ class GenomeAnalyzer:
 
         return reads, vntr_read_ids
 
-    def find_repeat_counts_from_pacbio_alignment_file(self, alignment_file, log_pacbio_reads, accuracy_filter):
-        unmapped_reads_file = extract_unmapped_reads_to_fasta_file(alignment_file, self.working_dir, self.ref_filename)
-        filtered_reads, vntr_reads_ids = self.get_vntr_filtered_reads_map(unmapped_reads_file, False)
+    def find_repeat_counts_from_pacbio_alignment_file(
+        self, alignment_file, log_pacbio_reads, accuracy_filter
+    ):
+        unmapped_reads_file = extract_unmapped_reads_to_fasta_file(
+            alignment_file, self.working_dir, self.ref_filename
+        )
+        filtered_reads, vntr_reads_ids = self.get_vntr_filtered_reads_map(
+            unmapped_reads_file, False
+        )
 
-        if self.outfmt == 'bed':
+        if self.outfmt == "bed":
             self.print_bed_header()
-        if self.outfmt == 'vcf':
+        if self.outfmt == "vcf":
             self.print_vcf_header()
         for vid in self.target_vntr_ids:
             reads = [read for read in filtered_reads if read.id in vntr_reads_ids[vid]]
             try:
-                genotype_result = self.vntr_finder[vid].find_repeat_count_from_pacbio_alignment_file(
-                                            alignment_file=alignment_file,
-                                            unmapped_filtered_reads=reads,
-                                            log_pacbio_reads=log_pacbio_reads,
-                                            accuracy_filter=accuracy_filter)
+                genotype_result = self.vntr_finder[
+                    vid
+                ].find_repeat_count_from_pacbio_alignment_file(
+                    alignment_file=alignment_file,
+                    unmapped_filtered_reads=reads,
+                    log_pacbio_reads=log_pacbio_reads,
+                    accuracy_filter=accuracy_filter,
+                )
                 self.print_genotype(vid, genotype_result)
             except UnboundLocalError as unbound_local_error:
-                error_message = "UnboundLocalError when finding repeat count from pacbio alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(vid, unbound_local_error)
+                error_message = "UnboundLocalError when finding repeat count from pacbio alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                    vid, unbound_local_error
+                )
                 logging.error(error_message)
-                self.print_genotype(vid, genotype_result=GenotypeResult(None, 0, 0, 0, 0), encountered_error=True)
+                self.print_genotype(
+                    vid,
+                    genotype_result=GenotypeResult(None, 0, 0, 0, 0),
+                    encountered_error=True,
+                )
             except Exception as error:
-                error_message = "Error when finding repeat count from pacbio alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(vid, error)
+                error_message = "Error when finding repeat count from pacbio alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                    vid, error
+                )
                 logging.error(error_message)
-                self.print_genotype(vid, genotype_result=GenotypeResult(None, 0, 0, 0, 0), encountered_error=True)
+                self.print_genotype(
+                    vid,
+                    genotype_result=GenotypeResult(None, 0, 0, 0, 0),
+                    encountered_error=True,
+                )
 
-    def find_repeat_counts_from_pacbio_reads(self, read_file, log_pacbio_reads, accuracy_filter, naive=False):
-        filtered_reads, vntr_reads_ids = self.get_vntr_filtered_reads_map(read_file, False)
-        if self.outfmt == 'bed':
+    def find_repeat_counts_from_pacbio_reads(
+        self, read_file, log_pacbio_reads, accuracy_filter, naive=False
+    ):
+        filtered_reads, vntr_reads_ids = self.get_vntr_filtered_reads_map(
+            read_file, False
+        )
+        if self.outfmt == "bed":
             self.print_bed_header()
-        if self.outfmt == 'vcf':
+        if self.outfmt == "vcf":
             self.print_vcf_header()
         for vid in self.target_vntr_ids:
-            unmapped_reads = [read for read in filtered_reads if read.id in vntr_reads_ids[vid]]
+            unmapped_reads = [
+                read for read in filtered_reads if read.id in vntr_reads_ids[vid]
+            ]
             try:
-                genotype_result = self.vntr_finder[vid].find_repeat_count_from_pacbio_reads(
-                                        unmapped_filtered_reads=unmapped_reads,
-                                        log_pacbio_reads=log_pacbio_reads,
-                                        accuracy_filter=accuracy_filter,
-                                        naive=naive)
+                genotype_result = self.vntr_finder[
+                    vid
+                ].find_repeat_count_from_pacbio_reads(
+                    unmapped_filtered_reads=unmapped_reads,
+                    log_pacbio_reads=log_pacbio_reads,
+                    accuracy_filter=accuracy_filter,
+                    naive=naive,
+                )
                 self.print_genotype(vid, genotype_result)
             except UnboundLocalError as unbound_local_error:
-                error_message = "UnboundLocalError when finding repeat count from pacbio reads for vntr id {}: {}. Skipping genotyping for this VNTR.".format(vid, unbound_local_error)
+                error_message = "UnboundLocalError when finding repeat count from pacbio reads for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                    vid, unbound_local_error
+                )
                 logging.error(error_message)
-                self.print_genotype(vid, genotype_result=GenotypeResult(None, 0, 0, 0, 0), encountered_error=True)
+                self.print_genotype(
+                    vid,
+                    genotype_result=GenotypeResult(None, 0, 0, 0, 0),
+                    encountered_error=True,
+                )
             except Exception as error:
-                error_message = "Error when finding repeat count from pacbio reads for vntr id {}: {}. Skipping genotyping for this VNTR.".format(vid, error)
+                error_message = "Error when finding repeat count from pacbio reads for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                    vid, error
+                )
                 logging.error(error_message)
-                self.print_genotype(vid, genotype_result=GenotypeResult(None, 0, 0, 0, 0), encountered_error=True)
+                self.print_genotype(
+                    vid,
+                    genotype_result=GenotypeResult(None, 0, 0, 0, 0),
+                    encountered_error=True,
+                )
 
     def find_frameshift_from_alignment_file(self, alignment_file):
         for vid in self.target_vntr_ids:
             try:
-                result = self.vntr_finder[vid].find_frameshift_from_alignment_file(alignment_file, [])
+                result = self.vntr_finder[vid].find_frameshift_from_alignment_file(
+                    alignment_file, []
+                )
                 print(vid)
                 print(result)
             except UnboundLocalError as unbound_local_error:
-                error_message = "UnboundLocalError when finding frameshift from alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(vid, unbound_local_error)
+                error_message = "UnboundLocalError when finding frameshift from alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                    vid, unbound_local_error
+                )
                 logging.error(error_message)
             except Exception as error:
-                error_message = "Error when finding frameshift from alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(vid, error)
+                error_message = "Error when finding frameshift from alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                    vid, error
+                )
                 logging.error(error_message)
 
-    def find_repeat_counts_from_alignment_file(self, alignment_file, accuracy_filter, average_coverage, update=False):
-        unmapped_reads_file = extract_unmapped_reads_to_fasta_file(alignment_file, self.working_dir, self.ref_filename)
-        filtered_reads, vntr_reads_ids = self.get_vntr_filtered_reads_map(unmapped_reads_file)
-        if self.outfmt == 'bed':
+    def find_repeat_counts_from_alignment_file(
+        self, alignment_file, accuracy_filter, average_coverage, update=False
+    ):
+        unmapped_reads_file = extract_unmapped_reads_to_fasta_file(
+            alignment_file, self.working_dir, self.ref_filename
+        )
+        filtered_reads, vntr_reads_ids = self.get_vntr_filtered_reads_map(
+            unmapped_reads_file
+        )
+        if self.outfmt == "bed":
             self.print_bed_header()
-        if self.outfmt == 'vcf':
+        if self.outfmt == "vcf":
             self.print_vcf_header()
         for vid in self.target_vntr_ids:
-            unmapped_reads = [read for read in filtered_reads if read.id in vntr_reads_ids[vid]]
+            unmapped_reads = [
+                read for read in filtered_reads if read.id in vntr_reads_ids[vid]
+            ]
             try:
-                genotype_result = self.vntr_finder[vid].find_repeat_count_from_alignment_file(
-                                    alignment_file=alignment_file,
-                                    unmapped_filtered_reads=unmapped_reads,
-                                    accuracy_filter=accuracy_filter,
-                                    average_coverage=average_coverage,
-                                    update=update)
+                genotype_result = self.vntr_finder[
+                    vid
+                ].find_repeat_count_from_alignment_file(
+                    alignment_file=alignment_file,
+                    unmapped_filtered_reads=unmapped_reads,
+                    accuracy_filter=accuracy_filter,
+                    average_coverage=average_coverage,
+                    update=update,
+                )
                 self.print_genotype(vid, genotype_result)
             except UnboundLocalError as unbound_local_error:
-                error_message = "UnboundLocalError when finding repeat count from alignment file (illumina) for vntr id {}: {}. Skipping genotyping for this VNTR.".format(vid, unbound_local_error)
+                error_message = "UnboundLocalError when finding repeat count from alignment file (illumina) for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                    vid, unbound_local_error
+                )
                 logging.error(error_message)
-                self.print_genotype(vid, genotype_result=GenotypeResult(None, 0, 0, 0, 0), encountered_error=True)
+                self.print_genotype(
+                    vid,
+                    genotype_result=GenotypeResult(None, 0, 0, 0, 0),
+                    encountered_error=True,
+                )
             except Exception as error:
-                error_message = "Error when finding repeat count from alignment file (illumina) for vntr id {}: {}. Skipping genotyping for this VNTR.".format(vid, error)
+                error_message = "Error when finding repeat count from alignment file (illumina) for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                    vid, error
+                )
                 logging.error(error_message)
-                self.print_genotype(vid, genotype_result=GenotypeResult(None, 0, 0, 0, 0), encountered_error=True)
+                self.print_genotype(
+                    vid,
+                    genotype_result=GenotypeResult(None, 0, 0, 0, 0),
+                    encountered_error=True,
+                )
 
     def find_repeat_counts_from_short_reads(self, read_file, accuracy_filter):
-        if self.outfmt == 'bed':
+        if self.outfmt == "bed":
             self.print_bed_header()
-        if self.outfmt == 'vcf':
+        if self.outfmt == "vcf":
             self.print_vcf_header()
         for vid in self.target_vntr_ids:
             try:
-                genotype_result = self.vntr_finder[vid].find_repeat_count_from_short_reads(
-                    short_read_files=read_file,
-                    accuracy_filter=accuracy_filter)
+                genotype_result = self.vntr_finder[
+                    vid
+                ].find_repeat_count_from_short_reads(
+                    short_read_files=read_file, accuracy_filter=accuracy_filter
+                )
                 self.print_genotype(vid, genotype_result)
             except UnboundLocalError as unbound_local_error:
-                error_message = "UnboundLocalError when finding repeat count for vntr id {}: {}. Skipping genotyping for this VNTR.".format(vid, unbound_local_error)
+                error_message = "UnboundLocalError when finding repeat count for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                    vid, unbound_local_error
+                )
                 logging.error(error_message)
-                self.print_genotype(vid, genotype_result=GenotypeResult(None, 0, 0, 0, 0), encountered_error=True)
+                self.print_genotype(
+                    vid,
+                    genotype_result=GenotypeResult(None, 0, 0, 0, 0),
+                    encountered_error=True,
+                )
             except Exception as error:
-                error_message = "Error when finding repeat count for vntr id {}: {}. Skipping genotyping for this VNTR.".format(vid, error)
+                error_message = "Error when finding repeat count for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                    vid, error
+                )
                 logging.error(error_message)
-                self.print_genotype(vid, genotype_result=GenotypeResult(None, 0, 0, 0, 0), encountered_error=True)
-
+                self.print_genotype(
+                    vid,
+                    genotype_result=GenotypeResult(None, 0, 0, 0, 0),
+                    encountered_error=True,
+                )

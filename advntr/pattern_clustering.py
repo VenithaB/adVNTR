@@ -1,4 +1,3 @@
-
 from Bio import pairwise2
 from sklearn.cluster import AgglomerativeClustering
 import numpy as np
@@ -8,7 +7,7 @@ import numpy.matlib as matlib
 def get_sequence_distance(s, t, high_indel_penalty=False):
     max_length = max(len(s), len(t))
     if high_indel_penalty:
-        return max_length - pairwise2.align.globalms(s, t, 1, -.5, -1, -1)[0][2]
+        return max_length - pairwise2.align.globalms(s, t, 1, -0.5, -1, -1)[0][2]
     return max_length - pairwise2.align.globalxx(s, t, score_only=True)
 
 
@@ -43,10 +42,12 @@ def get_elbow_point_index(wcss):
     line_vector = all_coordinates[-1] - all_coordinates[0]
     line_vector_norm = line_vector / np.sqrt(np.sum(line_vector**2))
     vec_from_first = all_coordinates - first_point
-    scalar_product = np.sum(vec_from_first * matlib.repmat(line_vector_norm, number_of_points, 1), axis=1)
+    scalar_product = np.sum(
+        vec_from_first * matlib.repmat(line_vector_norm, number_of_points, 1), axis=1
+    )
     vec_from_first_parallel = np.outer(scalar_product, line_vector_norm)
     vectors_to_line = vec_from_first - vec_from_first_parallel
-    dists_to_line = np.sqrt(np.sum(vectors_to_line ** 2, axis=1))
+    dists_to_line = np.sqrt(np.sum(vectors_to_line**2, axis=1))
     index_of_best_point = np.argmax(dists_to_line)
     return index_of_best_point
 
@@ -57,13 +58,17 @@ def get_pattern_clusters(patterns):
     distance_matrix = get_distance_matrix(patterns)
     distortions = []
     clusterings = []
-    for k in range(1, len(patterns)+1):
-        f = AgglomerativeClustering(affinity='precomputed', linkage='complete', n_clusters=k).fit(distance_matrix)
+    for k in range(1, len(patterns) + 1):
+        f = AgglomerativeClustering(
+            affinity="precomputed", linkage="complete", n_clusters=k
+        ).fit(distance_matrix)
         clusters = [[] for _ in range(k)]
         for pattern_index, label in enumerate(f.labels_):
             clusters[label].append(pattern_index)
         cluster_similarities = get_cluster_similarities(clusters, distance_matrix)
-        clustering_quality = sum(cluster_similarities) / float(len(cluster_similarities))
+        clustering_quality = sum(cluster_similarities) / float(
+            len(cluster_similarities)
+        )
 
         distortions.append(clustering_quality)
         clusterings.append(clusters)

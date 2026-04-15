@@ -15,6 +15,10 @@ DEPS = $(wildcard *.h)
 # Python source directories (pomegranate/ is Cython and excluded from linting)
 PY_DIRS = advntr/ tests/
 
+# Run Python tools via the conda environment
+PYTHON = conda run -n advntr_env python
+PY_RUN = conda run -n advntr_env
+
 $(OBJDIR):
 		if [ ! -d $(OBJDIR) ]; then mkdir $(OBJDIR); fi
 
@@ -37,19 +41,19 @@ check: format lint typecheck test
 
 ## Auto-format with black
 format:
-		black $(PY_DIRS)
+		$(PY_RUN) black $(PY_DIRS)
 
 ## Check code quality with flake8
 lint:
-		flake8 $(PY_DIRS)
+		$(PY_RUN) flake8 $(PY_DIRS)
 
 ## Type-check with mypy
 typecheck:
-		mypy $(PY_DIRS)
+		$(PY_RUN) mypy $(PY_DIRS)
 
 ## Run tests with pytest and coverage
 test:
-		pytest --cov=advntr --cov-report=term-missing tests/
+		$(PY_RUN) pytest --cov=advntr --cov-report=term-missing tests/
 
 # -----------------------------------------------------------------------
 # C++ build targets
