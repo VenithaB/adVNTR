@@ -1,5 +1,5 @@
 from Bio import SeqIO, Seq
-from advntr.distance import *
+from advntr.distance import get_nucleotide_map, nucleotide_dist
 
 
 def match_query_by_sliding_windows(

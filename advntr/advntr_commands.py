@@ -288,7 +288,8 @@ def add_model(args, addmodel_parser):
     vntr_finder = VNTRFinder(ref_vntr)
 
     print(
-        "Searching reference genome for regions with shared kmers with VNTR. It takes a few hours for human genome"
+        "Searching reference genome for regions with shared kmers with VNTR."
+        " It takes a few hours for human genome"
     )
     scaled_recruitment_score = vntr_finder.train_classifier_threshold(args.reference)
     ref_vntr.scaled_score = scaled_recruitment_score

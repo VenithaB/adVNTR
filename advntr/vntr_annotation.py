@@ -185,7 +185,7 @@ def is_within_coding_exon(vntr_chromosome, vntr_start, vntr_end, exons):
     return False
 
 
-def intersects_with_coding_exon(vntr_chromosme, vntr_start, vntr_end, exons):
+def intersects_with_coding_exon(vntr_chromosome, vntr_start, vntr_end, exons):
     for start, end, _, _, _ in exons[vntr_chromosome]:
         if start > vntr_end:
             break
@@ -313,11 +313,11 @@ def get_intron_count(vntr_start, vntr_end, chromosome, regions):
     res = None
     for start, end, identifier, direction in regions[chromosome]:
         if intersect(start, end, vntr_start, vntr_end):
-            if gene_reference == "ucsc":
-                gene_name = get_gene_name_from_ucsc_id(identifier.split("_")[0])
+            if gene_reference == "ucsc":  # noqa: F821
+                _gene_name = get_gene_name_from_ucsc_id(identifier.split("_")[0])  # noqa: F841
             else:
-                gene_name = get_gene_name_from_refseq_id(
-                    identifier.split(".")[0], name_mapping
+                _gene_name = get_gene_name_from_refseq_id(  # noqa: F841
+                    identifier.split(".")[0], name_mapping  # noqa: F821
                 )
             if direction == "+":
                 res = index + 1

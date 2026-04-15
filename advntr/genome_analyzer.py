@@ -301,8 +301,11 @@ class GenomeAnalyzer:
                 )
                 self.print_genotype(vid, genotype_result)
             except UnboundLocalError as unbound_local_error:
-                error_message = "UnboundLocalError when finding repeat count from pacbio alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
-                    vid, unbound_local_error
+                error_message = (
+                    "UnboundLocalError when finding repeat count from pacbio alignment file"
+                    " for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                        vid, unbound_local_error
+                    )
                 )
                 logging.error(error_message)
                 self.print_genotype(
@@ -311,8 +314,11 @@ class GenomeAnalyzer:
                     encountered_error=True,
                 )
             except Exception as error:
-                error_message = "Error when finding repeat count from pacbio alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
-                    vid, error
+                error_message = (
+                    "Error when finding repeat count from pacbio alignment file"
+                    " for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                        vid, error
+                    )
                 )
                 logging.error(error_message)
                 self.print_genotype(
@@ -346,8 +352,11 @@ class GenomeAnalyzer:
                 )
                 self.print_genotype(vid, genotype_result)
             except UnboundLocalError as unbound_local_error:
-                error_message = "UnboundLocalError when finding repeat count from pacbio reads for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
-                    vid, unbound_local_error
+                error_message = (
+                    "UnboundLocalError when finding repeat count from pacbio reads"
+                    " for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                        vid, unbound_local_error
+                    )
                 )
                 logging.error(error_message)
                 self.print_genotype(
@@ -356,8 +365,11 @@ class GenomeAnalyzer:
                     encountered_error=True,
                 )
             except Exception as error:
-                error_message = "Error when finding repeat count from pacbio reads for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
-                    vid, error
+                error_message = (
+                    "Error when finding repeat count from pacbio reads"
+                    " for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                        vid, error
+                    )
                 )
                 logging.error(error_message)
                 self.print_genotype(
@@ -375,13 +387,19 @@ class GenomeAnalyzer:
                 print(vid)
                 print(result)
             except UnboundLocalError as unbound_local_error:
-                error_message = "UnboundLocalError when finding frameshift from alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
-                    vid, unbound_local_error
+                error_message = (
+                    "UnboundLocalError when finding frameshift from alignment file"
+                    " for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                        vid, unbound_local_error
+                    )
                 )
                 logging.error(error_message)
             except Exception as error:
-                error_message = "Error when finding frameshift from alignment file for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
-                    vid, error
+                error_message = (
+                    "Error when finding frameshift from alignment file"
+                    " for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                        vid, error
+                    )
                 )
                 logging.error(error_message)
 
@@ -414,8 +432,11 @@ class GenomeAnalyzer:
                 )
                 self.print_genotype(vid, genotype_result)
             except UnboundLocalError as unbound_local_error:
-                error_message = "UnboundLocalError when finding repeat count from alignment file (illumina) for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
-                    vid, unbound_local_error
+                error_message = (
+                    "UnboundLocalError when finding repeat count from alignment file (illumina)"
+                    " for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                        vid, unbound_local_error
+                    )
                 )
                 logging.error(error_message)
                 self.print_genotype(
@@ -424,8 +445,11 @@ class GenomeAnalyzer:
                     encountered_error=True,
                 )
             except Exception as error:
-                error_message = "Error when finding repeat count from alignment file (illumina) for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
-                    vid, error
+                error_message = (
+                    "Error when finding repeat count from alignment file (illumina)"
+                    " for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                        vid, error
+                    )
                 )
                 logging.error(error_message)
                 self.print_genotype(
@@ -448,8 +472,11 @@ class GenomeAnalyzer:
                 )
                 self.print_genotype(vid, genotype_result)
             except UnboundLocalError as unbound_local_error:
-                error_message = "UnboundLocalError when finding repeat count for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
-                    vid, unbound_local_error
+                error_message = (
+                    "UnboundLocalError when finding repeat count"
+                    " for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                        vid, unbound_local_error
+                    )
                 )
                 logging.error(error_message)
                 self.print_genotype(
@@ -458,8 +485,11 @@ class GenomeAnalyzer:
                     encountered_error=True,
                 )
             except Exception as error:
-                error_message = "Error when finding repeat count for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
-                    vid, error
+                error_message = (
+                    "Error when finding repeat count"
+                    " for vntr id {}: {}. Skipping genotyping for this VNTR.".format(
+                        vid, error
+                    )
                 )
                 logging.error(error_message)
                 self.print_genotype(

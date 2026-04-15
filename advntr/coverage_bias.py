@@ -5,7 +5,12 @@ import sys
 import pysam
 import numpy
 
-from advntr.settings import *
+from advntr.settings import (
+    CHROMOSOMES,
+    GC_CONTENT_BINS,
+    GC_CONTENT_WINDOW_SIZE,
+    OUTLIER_COVERAGE,
+)
 from advntr.utils import get_chromosome_reference_sequence, get_gc_content
 
 
@@ -20,9 +25,10 @@ class CoverageBiasDetector:
     ):
         """
         :param alignment_file: The alignment file. It must be SAM/BAM file.
-        :param chromosome: It specifies the chromosome in which the bias should be detected. ex: chr10.
-            Defaults to None which corresponds to all chromosomes.
-        :param alignment_reference: The alignment reference used in alignment file. Defaults to HG19.
+        :param chromosome: It specifies the chromosome in which the bias should be detected.
+            ex: chr10. Defaults to None which corresponds to all chromosomes.
+        :param alignment_reference: The alignment reference used in alignment file.
+            Defaults to HG19.
         """
         self.alignment_file = alignment_file
         self.chromosome = [chromosome] if chromosome is not None else None

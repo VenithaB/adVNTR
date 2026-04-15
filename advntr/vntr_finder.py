@@ -3,9 +3,11 @@ import logging
 import numpy
 import os
 from multiprocessing import Process, Manager, Value, Semaphore
-from random import random
 
-from keras.models import Sequential, load_model
+try:
+    from tensorflow.keras.models import load_model
+except ImportError:
+    from keras.models import load_model
 import pysam
 from enum import Enum
 
@@ -13,15 +15,21 @@ from Bio import pairwise2
 from Bio.Seq import Seq
 from Bio import SeqIO
 
-from advntr.coverage_bias import CoverageBiasDetector, CoverageCorrector
-from advntr.deep_recruitment import get_embedding_of_string, input_dim
-from advntr.hmm_utils import *
+from advntr.deep_recruitment import get_embedding_of_string
+from advntr.hmm_utils import (
+    get_emitted_basepair_from_visited_states,
+    get_flanking_regions_matching_rate,
+    get_left_flanking_region_size_in_vpath,
+    get_number_of_matches_in_vpath,
+    get_number_of_repeat_bp_matches_in_vpath,
+    get_number_of_repeats_in_vpath,
+    get_read_matcher_model,
+    get_repeating_pattern_lengths,
+    get_right_flanking_region_size_in_vpath,
+)
 from advntr.pacbio_haplotyper import PacBioHaplotyper
 from advntr.profiler import time_usage
-from advntr.sam_utils import (
-    get_reference_genome_of_alignment_file,
-    get_related_reads_and_read_count_in_samfile,
-)
+from advntr.sam_utils import get_reference_genome_of_alignment_file
 from advntr import settings
 from advntr.utils import is_low_quality_read
 from pomegranate import HiddenMarkovModel as Model
@@ -848,14 +856,14 @@ class VNTRFinder:
             return None
         self.check_if_flanking_regions_align_to_str(
             haplotypes[0].upper(),
-            read.read_id,
+            "",  # no per-read ID available in haplotype-based path
             flanking_region_lengths,
             new_spanning_reads,
         )
         reverse_complement_str = str(Seq(haplotypes[0]).reverse_complement())
         self.check_if_flanking_regions_align_to_str(
             reverse_complement_str.upper(),
-            read.read_id,
+            "",  # no per-read ID available in haplotype-based path
             flanking_region_lengths,
             new_spanning_reads,
         )

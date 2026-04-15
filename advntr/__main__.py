@@ -40,7 +40,9 @@ def main():
     parser = argparse.ArgumentParser(usage=usage, add_help=False)
     subparsers = parser.add_subparsers(title="Commands", dest="command")
 
-    fmt = lambda prog: CustomHelpFormatter(prog)
+    def fmt(prog):
+        return CustomHelpFormatter(prog)
+
     genotype_parser = subparsers.add_parser(
         "genotype",
         usage="advntr genotype [options]",

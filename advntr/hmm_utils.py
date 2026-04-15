@@ -159,9 +159,9 @@ def get_repeat_segments_from_visited_states_and_region(visited_states, region):
 
     repeat_segments = []
     added = 0
-    for l in lengths:
-        repeat_segments.append(region[added : added + l])
-        added += l
+    for length in lengths:
+        repeat_segments.append(region[added : added + length])
+        added += length
     return repeat_segments
 
 
@@ -872,9 +872,12 @@ def build_reference_repeat_finder_hmm(patterns, copies=1):
         last_end = unit_end
 
     model.bake()
-    if len(patterns) > 1:
-        # model.fit(patterns, algorithm='baum-welch', transition_pseudocount=1, use_pseudocount=True)
-        fit_patterns = [pattern * copies for pattern in patterns]
-        # model.fit(fit_patterns, algorithm='viterbi', transition_pseudocount=1, use_pseudocount=True)
+    # Commented-out model.fit calls (baum-welch / viterbi) left here for reference:
+    # if len(patterns) > 1:
+    #     model.fit(patterns, algorithm='baum-welch', transition_pseudocount=1, use_pseudocount=True)
+    #     model.fit(
+    #         [pattern * copies for pattern in patterns],
+    #         algorithm='viterbi', transition_pseudocount=1, use_pseudocount=True
+    #     )
 
     return model

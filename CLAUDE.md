@@ -56,6 +56,7 @@ This is a modernized fork of [adVNTR](https://github.com/mehrdadbakhtiari/adVNTR
 - Format first, then lint, then type-check, then test — in that order.
 - Clean up the code first, then change structure.
 - Aim for high test coverage.
+- flake8 is run with `--max-line-length 100` to accommodate existing long strings in CLI help text and to avoid conflicts with black's 88-char default.
 
 ## Project Structure
 

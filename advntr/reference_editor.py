@@ -11,7 +11,7 @@ def add_two_copy_to_all_patterns(patterns, start_points):
     record = SeqRecord.SeqRecord("")
     for fasta in fasta_sequences:
         record = fasta
-        name, sequence = fasta.id, str(fasta.seq)
+        sequence = str(fasta.seq)
     total_added_chars = 0
     for i in range(len(patterns)):
         start_point = start_points[i] + total_added_chars
@@ -53,7 +53,7 @@ def create_cel_frameshifts(cel_vntr):
     vntr = sequence[cel_vntr.start_point : vntr_end]
     right_flank = sequence[vntr_end : vntr_end + 3000]
 
-    for frameshift in xrange(160, 360, 10):
+    for frameshift in range(160, 360, 10):
         deletion = left_flank + vntr[:frameshift] + vntr[frameshift + 1 :] + right_flank
         insertion = (
             left_flank

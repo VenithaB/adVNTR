@@ -8,7 +8,6 @@ from Bio import Seq, SeqRecord, SeqIO
 from advntr.reference_vntr import ReferenceVNTR
 
 from advntr.vntr_annotation import (
-    get_gene_name_and_annotation_of_vntr,
     is_vntr_close_to_gene,
     get_genes_info,
 )
@@ -174,10 +173,14 @@ def create_vntrs_database(db_file):
         os.makedirs(os.path.dirname(db_file))
     db = sqlite3.connect(db_file)
     cursor = db.cursor()
-    cursor.execute("""
-    CREATE TABLE vntrs(id INTEGER PRIMARY KEY, nonoverlapping TEXT, chromosome TEXT, ref_start INTEGER, gene_name TEXT,
-    annotation TEXT, pattern TEXT, left_flanking TEXT, right_flanking TEXT, repeats TEXT, scaled_score REAL default 0)
-    """)
+    cursor.execute(
+        """CREATE TABLE vntrs(
+        id INTEGER PRIMARY KEY, nonoverlapping TEXT, chromosome TEXT,
+        ref_start INTEGER, gene_name TEXT, annotation TEXT, pattern TEXT,
+        left_flanking TEXT, right_flanking TEXT, repeats TEXT,
+        scaled_score REAL default 0
+    )"""
+    )
 
     db.commit()
     db.close()
@@ -190,14 +193,14 @@ def load_unique_vntrs_data(db_file=None):
     db = sqlite3.connect(db_file)
     cursor = db.cursor()
     cursor.execute(
-        """SELECT id, nonoverlapping, chromosome, ref_start, gene_name, annotation, pattern, left_flanking,
-    right_flanking, repeats, scaled_score FROM vntrs"""
+        """SELECT id, nonoverlapping, chromosome, ref_start, gene_name, annotation,
+    pattern, left_flanking, right_flanking, repeats, scaled_score FROM vntrs"""
     )
 
     for row in cursor:
         new_row = []
         for element in row:
-            if type(element) != int and type(element) != float:
+            if not isinstance(element, (int, float)):
                 new_row.append(str(element))
             else:
                 new_row.append(element)
@@ -260,8 +263,9 @@ def save_vntrs_to_database(processed_vntrs, db_file, vntr_length_threshold=10000
         if len(segments.replace(",", "")) > vntr_length_threshold:
             continue
         cursor.execute(
-            """INSERT INTO vntrs(id, nonoverlapping, chromosome, ref_start, gene_name, annotation, pattern,
-                       left_flanking, right_flanking, repeats, scaled_score) VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
+            """INSERT INTO vntrs(id, nonoverlapping, chromosome, ref_start, gene_name,
+                       annotation, pattern, left_flanking, right_flanking, repeats,
+                       scaled_score) VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 vntr_id,
                 overlap,
@@ -319,8 +323,9 @@ def save_reference_vntr_to_database(ref_vntr, db_file=None):
     segments = ",".join(ref_vntr.get_repeat_segments())
     non_overlapping = "True" if ref_vntr.non_overlapping else "False"
     cursor.execute(
-        """INSERT INTO vntrs(id, nonoverlapping, chromosome, ref_start, gene_name, annotation, pattern,
-                   left_flanking, right_flanking, repeats, scaled_score) VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
+        """INSERT INTO vntrs(id, nonoverlapping, chromosome, ref_start, gene_name,
+                   annotation, pattern, left_flanking, right_flanking, repeats,
+                   scaled_score) VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
         (
             ref_vntr.id,
             non_overlapping,

@@ -13,7 +13,8 @@ from advntr.hierarchical_clustering import hierarchical_clustering
 
 
 class PacBioHaplotyper:
-    """Find error corrected VNTR section in two haplotypes from PacBio reads and genotype the number of repeats"""
+    """Find error corrected VNTR section in two haplotypes from PacBio reads
+    and genotype the number of repeats."""
 
     def __init__(self, reads):
         logging.debug("Number of reads for finding haplotypes: %s" % len(reads))

@@ -43,9 +43,10 @@ check: format lint typecheck test
 format:
 		$(PY_RUN) black $(PY_DIRS)
 
-## Check code quality with flake8
+## Check code quality with flake8 (max-line-length 100 to accommodate CLI help text;
+## E203 ignored because black formats slices with spaces that flake8 rejects)
 lint:
-		$(PY_RUN) flake8 $(PY_DIRS)
+		$(PY_RUN) flake8 --max-line-length 100 --extend-ignore E203 $(PY_DIRS)
 
 ## Type-check with mypy
 typecheck:

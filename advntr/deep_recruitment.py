@@ -491,7 +491,9 @@ def run_simulation(vntr_map, vntr_id):
     # map with bowtie2
     #    run_bowtie2(simulated_true_reads, simulated_false_filtered_reads, vntr_finder)
 
-    #    hmm_time = get_hmm_accuracy(vntr_finder, simulated_true_reads, simulated_false_filtered_reads)
+    #    hmm_time = get_hmm_accuracy(
+    #        vntr_finder, simulated_true_reads, simulated_false_filtered_reads
+    #    )
 
     if not os.path.exists(dnn_models_dir):
         os.makedirs(dnn_models_dir)
@@ -540,7 +542,7 @@ def run_simulation(vntr_map, vntr_id):
     start_time = time()
     classes = model.predict(test[0], batch_size=128)
     passed_time = embedding_time + time() - start_time
-    passed_time += hmm_time / len(test[0]) * len(true_embeddings) / 2
+    # passed_time += hmm_time / len(test[0]) * len(true_embeddings) / 2  # hmm_time disabled
     fn = 0.0
     fp = 0.0
     tp = 0.0

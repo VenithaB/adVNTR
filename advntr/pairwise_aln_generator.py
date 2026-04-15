@@ -364,6 +364,7 @@ def _generate_pairwise_aln(
 
     read_id = ""
     read_source = ""
+    vid = None
 
     # Load adVNTR log files
     with open(log_file, "r") as f:
@@ -598,6 +599,8 @@ def _get_flanking_region_error_rate(log_file, ref_vntrs, vid_list):
         lambda: defaultdict(lambda: defaultdict(int))
     )
     is_target = False if vid_list is not None else True
+    visited_states = None
+    sequence = None
 
     # Load adVNTR log files
     with open(log_file, "r") as f:
@@ -624,9 +627,9 @@ def _get_flanking_region_error_rate(log_file, ref_vntrs, vid_list):
                     visited = line[line.index("[") + 1 : -2]
                     split = visited.split(", ")
                     split = [item[1:-1] for item in split]
-                    visited_states = split
+                    visited_states = split  # noqa: F841 — read in next iteration
                 else:
-                    sequence = line[30:].strip()
+                    sequence = line[30:].strip()  # noqa: F841 — read in next iteration
 
     return vid_repeat_flanking_errcount, vid_repeat_flanking_bpcount
 
