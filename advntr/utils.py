@@ -2,7 +2,12 @@ import logging
 
 from Bio import SeqIO
 
-from advntr.settings import HG19_DIR, LOW_QUALITY_BP_TO_DISCARD_READ, MAPQ_CUTOFF, QUALITY_SCORE_CUTOFF
+from advntr.settings import (
+    HG19_DIR,
+    LOW_QUALITY_BP_TO_DISCARD_READ,
+    MAPQ_CUTOFF,
+    QUALITY_SCORE_CUTOFF,
+)
 
 
 def get_min_number_of_copies_to_span_read(pattern, read_length=150):

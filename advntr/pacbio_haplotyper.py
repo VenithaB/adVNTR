@@ -79,7 +79,8 @@ class PacBioHaplotyper:
         return seq
 
     def get_read_clusters(self, number_of_clusters=2):
-        """Cluster reads to two group based on informative base pairs to separate the reads of each haplotype"""
+        """Cluster reads to two groups based on informative base pairs
+        to separate the reads of each haplotype."""
         muscle_cline = MuscleCommandline("muscle", clwstrict=True)
         data = "\n".join(
             [">%s\n" % str(i) + self.reads[i] for i in range(len(self.reads))]

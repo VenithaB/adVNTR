@@ -257,7 +257,8 @@ def get_flanking_regions_matching_rate(
         if visited_states[i].endswith("prefix"):
             if verbose:
                 logging.debug(
-                    "state {} is matching {} seq_index {} sequence[seq_index] {} right_flank[hmm_state - 1] {} is emitting {}".format(
+                    "state {} is matching {} seq_index {} sequence[seq_index] {}"
+                    " right_flank[hmm_state - 1] {} is emitting {}".format(
                         visited_states[i],
                         is_match_state(visited_states[i]),
                         seq_index,
@@ -276,7 +277,8 @@ def get_flanking_regions_matching_rate(
         if visited_states[i].endswith("suffix"):
             if verbose:
                 logging.debug(
-                    "state {} is matching {} seq_index {} sequence[seq_index] {} left_flank[-(max_hmm_index - hmm_state + 1)] {} is emitting {}".format(
+                    "state {} is matching {} seq_index {} sequence[seq_index] {}"
+                    " left_flank[-(max_hmm_index - hmm_state + 1)] {} is emitting {}".format(
                         visited_states[i],
                         is_match_state(visited_states[i]),
                         seq_index,
@@ -296,7 +298,8 @@ def get_flanking_regions_matching_rate(
             seq_index += 1
     if accuracy_filter:
         # If accuracy filter is set, we want to be conservative in read recruiting.
-        # Therefore, in case of zero bp right (or left) flanking match, read is not confidently spanning the VNTR, so return 0.
+        # In case of zero bp right (or left) flanking match, read is not confidently
+        # spanning the VNTR, so return 0.
         epsilon = 0.00001
         right_rate = (
             float(right_flanking_matches) / right_flanking_basepairs
@@ -874,7 +877,9 @@ def build_reference_repeat_finder_hmm(patterns, copies=1):
     model.bake()
     # Commented-out model.fit calls (baum-welch / viterbi) left here for reference:
     # if len(patterns) > 1:
-    #     model.fit(patterns, algorithm='baum-welch', transition_pseudocount=1, use_pseudocount=True)
+    #     model.fit(
+    #         patterns, algorithm='baum-welch', transition_pseudocount=1, use_pseudocount=True
+    #     )
     #     model.fit(
     #         [pattern * copies for pattern in patterns],
     #         algorithm='viterbi', transition_pseudocount=1, use_pseudocount=True

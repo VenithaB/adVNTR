@@ -63,7 +63,9 @@ def build_profile_hmm_pseudocounts_for_alignment(error_rate, alignment):
                     emission[key][sub_key] = (
                         1.0 * emission[key][sub_key]
                     ) / total + pseu
-                    # emission[key][sub_key] = (emission[key][sub_key]+pseu)/(1+pseu*len(emission[key]))
+                    # emission[key][sub_key] = (
+                    #     (emission[key][sub_key]+pseu)/(1+pseu*len(emission[key]))
+                    # )
                     # emission[key][sub_key] = (emission[key][sub_key]+pseu)/(1+pseu*len(alphabet))
                     sub_total += 1.0 * emission[key][sub_key]
                 for sub_key in emission[key]:

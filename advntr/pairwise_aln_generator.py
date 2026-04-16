@@ -306,7 +306,8 @@ def write_alignment(
                     "Visited repeat unit order {}".format(visited_repeat_unit_order)
                 )
             af.write(
-                "# Mismatch in flanking regions: {}/{} {:.2f}, L:{}/{} {:.2f}, R:{}/{} {:.2f}\n".format(
+                "# Mismatch in flanking regions: {}/{} {:.2f},"
+                " L:{}/{} {:.2f}, R:{}/{} {:.2f}\n".format(
                     mismatch_count_in_left_flanking + mismatch_count_in_right_flanking,
                     left_flank_bp_count + right_flank_bp_count,
                     (
@@ -391,7 +392,8 @@ def _generate_pairwise_aln(
                         split = visited.split(", ")
                         split = [item[1:-1] for item in split]
                         visited_states = split
-                        # In case of frameshift detection, repeat count doesn't matter. It is set to 0 for consistency.
+                        # In case of frameshift detection, repeat count doesn't matter.
+                        # It is set to 0 for consistency.
                         vid_to_aln_info[vid][0].append(
                             (sequence, visited_states, "", "", "")
                         )
@@ -721,7 +723,10 @@ def init_argparse():
         action="store",
         nargs="*",
         default=None,
-        help="VID list to generate pairwise alignment. If not specified, all VNTRs in the log file is the list",
+        help=(
+            "VID list to generate pairwise alignment."
+            " If not specified, all VNTRs in the log file is the list"
+        ),
     )
     parser.add_argument(
         "-stat",

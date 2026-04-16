@@ -589,7 +589,8 @@ class VNTRFinder:
                 and read_region_end is not None
                 and read.seq is not None
             ):
-                # If deletion occurred on the right flanking region, we only get the remaining sequence.
+                # If deletion occurred on the right flanking region,
+                # we only get the remaining sequence.
                 result_seq = read.seq[
                     read_region_start : read_region_end + right_flanking_bp
                 ]
@@ -654,7 +655,8 @@ class VNTRFinder:
         for read in samfile.fetch(chromosome, region_start, region_end):
             if len(read.get_reference_positions()) == 0:
                 logging.debug(
-                    "no reference positions for read. skipping self.check_if_pacbio_mapped_read_spans_vntr for this read"
+                    "no reference positions for read."
+                    " skipping self.check_if_pacbio_mapped_read_spans_vntr for this read"
                 )
                 continue
             sema.acquire()
@@ -793,7 +795,8 @@ class VNTRFinder:
         logging.info("observed repeats: %s" % observed_copy_numbers)
 
         if accuracy_filter:
-            # If accuracy_filter is set, remove repeat counts if there is less than the threshold spanning reads.
+            # If accuracy_filter is set, remove repeat counts if there are fewer
+            # than the threshold spanning reads.
             sr_min_support = settings.ACCURACY_FILTER_SR_MIN_SUPPORT
             modified_copy_numbers = []
             cn_counter = Counter(observed_copy_numbers)
@@ -802,7 +805,8 @@ class VNTRFinder:
                     modified_copy_numbers.extend([key] * count)
             if sorted(modified_copy_numbers) != sorted(observed_copy_numbers):
                 logging.debug(
-                    "Modifying repeat counts in dominant_copy function. observed: {} modified: {}".format(
+                    "Modifying repeat counts in dominant_copy function."
+                    " observed: {} modified: {}".format(
                         Counter(observed_copy_numbers), Counter(modified_copy_numbers)
                     )
                 )
@@ -1231,7 +1235,8 @@ class VNTRFinder:
             max_flanking_repeat = []
 
         if accuracy_filter:
-            # If accuracy_filter is set, remove repeat counts if there is less than the threshold spanning reads.
+            # If accuracy_filter is set, remove repeat counts if there are fewer
+            # than the threshold spanning reads.
             sr_min_support = 3
             modified_repeats = []
             cn_counter = Counter(covered_repeats)
@@ -1245,7 +1250,7 @@ class VNTRFinder:
                     )
                 )
             covered_repeats = modified_repeats
-            # Also remove any non-spanning reads as they might reflect a lower bound on the number of repeats.
+            # Also remove non-spanning reads as they might reflect a lower bound on repeat count.
             max_flanking_repeat = []
 
         exact_genotype, max_prob = self.find_genotype_based_on_observed_repeats(
@@ -1287,7 +1292,8 @@ class VNTRFinder:
         self, short_read_files, accuracy_filter, working_directory="./"
     ):
         """
-        Map short read sequencing data to human reference genome (hg19) and call find_repeat_count_from_alignment_file
+        Map short read sequencing data to human reference genome (hg19)
+        and call find_repeat_count_from_alignment_file.
         :param short_read_files: short read sequencing data
         :param working_directory: directory for generating the outputs
         """
