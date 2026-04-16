@@ -32,7 +32,7 @@ from advntr.profiler import time_usage
 from advntr.sam_utils import get_reference_genome_of_alignment_file
 from advntr import settings
 from advntr.utils import is_low_quality_read
-from pomegranate import HiddenMarkovModel as Model
+from pomegranate import HiddenMarkovModel as Model  # type: ignore[attr-defined]
 
 
 class GenotypeResult:

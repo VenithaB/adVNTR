@@ -1,7 +1,4 @@
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 
 from Bio.Align.Applications import MuscleCommandline
 from Bio import AlignIO

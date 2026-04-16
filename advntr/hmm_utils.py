@@ -1,8 +1,8 @@
 import numpy as np
 
 import logging
-from pomegranate import DiscreteDistribution, State
-from pomegranate import HiddenMarkovModel as Model
+from pomegranate import DiscreteDistribution, State  # type: ignore[attr-defined]
+from pomegranate import HiddenMarkovModel as Model  # type: ignore[attr-defined]
 from advntr.profile_hmm import (
     build_profile_hmm_for_repeats,
     build_profile_hmm_pseudocounts_for_alignment,
