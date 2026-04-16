@@ -1,10 +1,15 @@
-from Bio import pairwise2
+from Bio.Align import PairwiseAligner
 
 from advntr.hmm_utils import (
     build_reference_repeat_finder_hmm,
     get_repeat_segments_from_visited_states_and_region,
 )
 from advntr.utils import get_chromosome_reference_sequence
+
+# gap-of-n cost = open + (n-1)*extend = -n; PairwiseAligner open_gap_score = open-extend = 0
+_LOCAL_ALIGNER = PairwiseAligner(
+    mode="local", match_score=1, mismatch_score=-1, open_gap_score=0, extend_gap_score=-1
+)
 
 
 class ReferenceVNTR:
@@ -99,9 +104,7 @@ class ReferenceVNTR:
             + another.pattern
             + another.right_flanking_region[:20]
         )
-        alignment_score = pairwise2.align.localms(
-            structure1, structure2, 1, -1, -1, -1, score_only=True
-        )
+        alignment_score = _LOCAL_ALIGNER.score(structure1, structure2)
         if (
             float(alignment_score) / len(structure1) > 0.66
             or float(alignment_score) / len(structure2) > 0.66

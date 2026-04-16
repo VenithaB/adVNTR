@@ -11,7 +11,7 @@ except ImportError:
 import pysam
 from enum import Enum
 
-from Bio import pairwise2
+from Bio.Align import PairwiseAligner
 from Bio.Seq import Seq
 from Bio import SeqIO
 
@@ -33,6 +33,14 @@ from advntr.sam_utils import get_reference_genome_of_alignment_file
 from advntr import settings
 from advntr.utils import is_low_quality_read
 from pomegranate import HiddenMarkovModel as Model  # type: ignore[attr-defined]
+
+# gap-of-n cost = open + (n-1)*extend = -n; PairwiseAligner open_gap_score = open-extend = 0
+_GLOBAL_ALIGNER = PairwiseAligner(
+    mode="global", match_score=1, mismatch_score=-1, open_gap_score=0, extend_gap_score=-1
+)
+_LOCAL_ALIGNER = PairwiseAligner(
+    mode="local", match_score=1, mismatch_score=-1, open_gap_score=0, extend_gap_score=-1
+)
 
 
 class GenotypeResult:
@@ -100,34 +108,20 @@ class VNTRFinder:
     def get_unique_left_flank(self):
         patterns = self.reference_vntr.get_repeat_segments()[0] * 10
         for i in range(self.minimum_flanking_size, 30):
-            alns = pairwise2.align.globalms(
-                patterns[-i:],
-                self.reference_vntr.left_flanking_region[-i:],
-                1,
-                -1,
-                -1,
-                -1,
+            score = _GLOBAL_ALIGNER.score(
+                patterns[-i:], self.reference_vntr.left_flanking_region[-i:]
             )
-            if len(alns) < 1:
-                return i
-            if alns[0][2] < i * 0.5:
+            if score < i * 0.5:
                 return i
         return 30
 
     def get_unique_right_flank(self):
         patterns = self.reference_vntr.get_repeat_segments()[-1] * 10
         for i in range(self.minimum_flanking_size, 30):
-            alns = pairwise2.align.globalms(
-                patterns[:i],
-                self.reference_vntr.right_flanking_region[:i],
-                1,
-                -1,
-                -1,
-                -1,
+            score = _GLOBAL_ALIGNER.score(
+                patterns[:i], self.reference_vntr.right_flanking_region[:i]
             )
-            if len(alns) < 1:
-                return i
-            if alns[0][2] < i * 0.5:
+            if score < i * 0.5:
                 return i
         return 30
 
@@ -462,40 +456,36 @@ class VNTRFinder:
         right_flanking = self.reference_vntr.right_flanking_region[
             :flanking_region_size
         ]
-        left_alignments = pairwise2.align.localms(
-            read_str, left_flanking, 1, -1, -1, -1
-        )
-        if len(left_alignments) < 1:
+        left_alignments = list(_LOCAL_ALIGNER.align(read_str, left_flanking))
+        if not left_alignments:
             return
         min_left, max_left = 10e9, 0
         for aln in left_alignments:
-            if aln[2] < len(left_flanking) * (1 - settings.MAX_ERROR_RATE):
+            if aln.score < len(left_flanking) * (1 - settings.MAX_ERROR_RATE):
                 continue
-            min_left = min(min_left, aln[3])
-            max_left = max(max_left, aln[3])
+            min_left = min(min_left, aln.path[0][1])
+            max_left = max(max_left, aln.path[0][1])
         if max_left - min_left > 30:
             with open("vntr_complex.txt", "a") as out:
                 out.write("%s %s\n" % (self.reference_vntr.id, max_left - min_left))
         left_align = left_alignments[0]
-        if left_align[2] < len(left_flanking) * (1 - settings.MAX_ERROR_RATE):
+        if left_align.score < len(left_flanking) * (1 - settings.MAX_ERROR_RATE):
             return
 
-        right_alignments = pairwise2.align.localms(
-            read_str, right_flanking, 1, -1, -1, -1
-        )
-        if len(right_alignments) < 1:
+        right_alignments = list(_LOCAL_ALIGNER.align(read_str, right_flanking))
+        if not right_alignments:
             return
         min_right, max_right = 10e9, 0
         for aln in right_alignments:
-            if aln[2] < len(right_flanking) * (1 - settings.MAX_ERROR_RATE):
+            if aln.score < len(right_flanking) * (1 - settings.MAX_ERROR_RATE):
                 continue
-            min_right = min(min_right, aln[3])
-            max_right = max(max_right, aln[3])
+            min_right = min(min_right, aln.path[0][1])
+            max_right = max(max_right, aln.path[0][1])
         if max_right - min_right > 30:
             with open("vntr_complex.txt", "a") as out:
                 out.write("%s %s\n" % (self.reference_vntr.id, max_right - min_right))
         right_align = right_alignments[0]
-        if right_align[2] < len(right_flanking) * (1 - settings.MAX_ERROR_RATE):
+        if right_align.score < len(right_flanking) * (1 - settings.MAX_ERROR_RATE):
             return
 
         if right_align[3] < left_align[3]:

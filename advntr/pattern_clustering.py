@@ -1,14 +1,24 @@
-from Bio import pairwise2
+from Bio.Align import PairwiseAligner
 from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 import numpy.matlib as matlib
+
+# gap-of-n cost = open + (n-1)*extend = -n; PairwiseAligner open_gap_score = open-extend = 0
+_ALIGNER_HIGH_INDEL = PairwiseAligner(
+    mode="global",
+    match_score=1,
+    mismatch_score=-0.5,
+    open_gap_score=0,
+    extend_gap_score=-1,
+)
+_ALIGNER_DEFAULT = PairwiseAligner(mode="global")
 
 
 def get_sequence_distance(s, t, high_indel_penalty=False):
     max_length = max(len(s), len(t))
     if high_indel_penalty:
-        return max_length - pairwise2.align.globalms(s, t, 1, -0.5, -1, -1)[0][2]
-    return max_length - pairwise2.align.globalxx(s, t, score_only=True)
+        return max_length - _ALIGNER_HIGH_INDEL.score(s, t)
+    return max_length - _ALIGNER_DEFAULT.score(s, t)
 
 
 def get_distance_matrix(patterns):

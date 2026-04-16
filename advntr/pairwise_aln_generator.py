@@ -1,17 +1,24 @@
-from advntr.models import load_unique_vntrs_data
-
-from io import StringIO
-
-from Bio.Align.Applications import MuscleCommandline
-from Bio import AlignIO
-from Bio import pairwise2
-
 from collections import defaultdict
 from collections import Counter
-
+from io import StringIO
+import argparse
 import glob
 import os.path
-import argparse
+
+from Bio.Align.Applications import MuscleCommandline
+from Bio.Align import PairwiseAligner
+from Bio import AlignIO
+
+from advntr.models import load_unique_vntrs_data
+
+# gap-of-n cost = open + (n-1)*extend = -n; PairwiseAligner open_gap_score = open-extend = 0
+_GLOBAL_ALIGNER = PairwiseAligner(
+    mode="global",
+    match_score=2,
+    mismatch_score=-1,
+    open_gap_score=0,
+    extend_gap_score=-1,
+)
 
 
 def get_consensus_pattern(patterns):
@@ -40,19 +47,18 @@ def get_consensus_pattern(patterns):
 
 def find_best_repeat_unit(repeat_unit_seq, unique_repeat_units):
     best_score = -len(min(unique_repeat_units, key=len))
-    best_aln = None
+    best_pair = None
     for unique_repeat_unit in unique_repeat_units:
-        aln = pairwise2.align.globalms(
-            repeat_unit_seq, unique_repeat_unit, 2, -1, -1, -1
-        )
-        score = (
-            float(aln[0][2]) / aln[0][-1]
-        )  # aln[0][2] is the score (match +1, otherwise 0)
+        aln = next(_GLOBAL_ALIGNER.align(repeat_unit_seq, unique_repeat_unit))
+        # Normalise by alignment length (= len of second sequence for global alignment)
+        score = aln.score / len(unique_repeat_unit)
         if score > best_score:
             best_score = score
-            best_aln = aln
+            # str(aln) → "target_aligned\nmatch_line\nquery_aligned\n"
+            lines = str(aln).split("\n")
+            best_pair = (lines[0], lines[2])
 
-    return best_aln[0]
+    return best_pair
 
 
 def get_match_line(best_aln):
