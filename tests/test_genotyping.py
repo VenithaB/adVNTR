@@ -12,37 +12,39 @@ class TestGenotyping(unittest.TestCase):
 
     def test_statistical_model_for_haploid_case(self):
         vntr_finder = VNTRFinder(self.get_reference_vntr())
-        genotype = vntr_finder.find_genotype_based_on_observed_repeats([3, 3, 3, 3, 3])
-        self.assertEqual(genotype, (3, 3))
+        # find_genotype_based_on_observed_repeats returns (copy_numbers, max_prob)
+        copy_numbers, _ = vntr_finder.find_genotype_based_on_observed_repeats([3, 3, 3, 3, 3])
+        self.assertEqual(copy_numbers, (3, 3))
 
     def test_statistical_model_for_haploid_organism(self):
         vntr_finder = VNTRFinder(self.get_reference_vntr(), is_haploid=True)
-        genotype = vntr_finder.find_genotype_based_on_observed_repeats([2, 3, 3, 3, 3])
-        self.assertEqual(genotype, (3, 3))
+        copy_numbers, _ = vntr_finder.find_genotype_based_on_observed_repeats([2, 3, 3, 3, 3])
+        self.assertEqual(copy_numbers, (3, 3))
 
     def test_statistical_model_for_diploid_case(self):
         vntr_finder = VNTRFinder(self.get_reference_vntr())
-        genotype = vntr_finder.find_genotype_based_on_observed_repeats([2, 2, 3, 3, 3])
-        if genotype[0] > genotype[1]:
-            genotype = (genotype[1], genotype[0])
-        self.assertEqual(genotype, (2, 3))
+        copy_numbers, _ = vntr_finder.find_genotype_based_on_observed_repeats([2, 2, 3, 3, 3])
+        if copy_numbers[0] > copy_numbers[1]:
+            copy_numbers = (copy_numbers[1], copy_numbers[0])
+        self.assertEqual(copy_numbers, (2, 3))
 
     def test_statistical_model_for_erroneous_diploid_case(self):
         vntr_finder = VNTRFinder(self.get_reference_vntr())
-        genotype = vntr_finder.find_genotype_based_on_observed_repeats(
+        copy_numbers, _ = vntr_finder.find_genotype_based_on_observed_repeats(
             [4, 5, 5, 5, 7, 8, 8, 8, 9]
         )
-        if genotype[0] > genotype[1]:
-            genotype = (genotype[1], genotype[0])
-        self.assertEqual(genotype, (5, 8))
+        if copy_numbers[0] > copy_numbers[1]:
+            copy_numbers = (copy_numbers[1], copy_numbers[0])
+        self.assertEqual(copy_numbers, (5, 8))
 
     def test_recruit_read_for_positive_read(self):
         vntr_finder = VNTRFinder(self.get_reference_vntr())
         logp = -20
         vpath = []
         min_score_to_count_read = -50
-        read_length = 100
+        # recruit_read expects the sequence string, not its length
+        read_sequence = "A" * 100
         results = vntr_finder.recruit_read(
-            logp, vpath, min_score_to_count_read, read_length
+            logp, vpath, min_score_to_count_read, read_sequence
         )
         self.assertEqual(results, True)

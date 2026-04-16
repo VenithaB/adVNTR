@@ -871,7 +871,7 @@ cdef class HiddenMarkovModel( GraphModel ):
 
         # Get the sorted silent states. Isn't it convenient how NetworkX has
         # exactly the algorithm we need?
-        silent_states_sorted = networkx.topological_sort(silent_subgraph, nbunch=silent_states)
+        silent_states_sorted = list(networkx.topological_sort(silent_subgraph))
 
         # What's the index of the first silent state?
         self.silent_start = len(normal_states)

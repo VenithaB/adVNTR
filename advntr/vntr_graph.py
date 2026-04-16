@@ -12,15 +12,15 @@ def plot_graph_components(nodes, edges, output_file_name="labels_and_colors.png"
         G.add_edge(u, v)
 
     try:
-        from networkx import graphviz_layout  # noqa: F401
-
-        layout = nx.graphviz_layout
-    except ImportError:
+        layout = nx.drawing.nx_agraph.graphviz_layout
+    except Exception:
         print("PyGraphviz not found; drawing with spring layout; will be slow.")
         layout = nx.spring_layout
     pos = layout(G)
     nx.draw(G, pos, with_labels=False, node_size=100)
-    Gcc = sorted(nx.connected_component_subgraphs(G), key=len, reverse=True)
+    Gcc = sorted(
+        (G.subgraph(c) for c in nx.connected_components(G)), key=len, reverse=True
+    )
     G0 = Gcc[0]
     nx.draw_networkx_edges(G0, pos, with_labels=False, edge_color="black", width=1.0)
     # show other connected components

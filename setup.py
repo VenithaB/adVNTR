@@ -15,7 +15,7 @@ setup(name='advntr',
       test_suite='tests',
       packages=['advntr', 'pomegranate'],
       package_dir={'advntr': 'advntr', 'advntr.pomegranate': 'pomegranate'},
-      install_requires=['networkx==1.11', 'scipy', 'biopython', 'cython', 'scikit-learn'],
+      install_requires=['networkx>=2.6', 'scipy', 'biopython>=1.76', 'cython', 'scikit-learn'],
       provides=["advntr"],
       entry_points={
             'console_scripts': ['advntr=advntr.__main__:main']

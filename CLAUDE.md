@@ -130,3 +130,42 @@ adVNTR/
 
 ## Changelog
 <!-- Document every bug fix and package update here as refactoring progresses -->
+
+### 2026-04-16
+
+#### Bug fixes
+- **`pomegranate/hmm.pyx` line 874**: Removed deprecated `nbunch` keyword from
+  `networkx.topological_sort()` call (removed in networkx ≥ 2.6). New call:
+  `list(networkx.topological_sort(silent_subgraph))`. The `nbunch` argument was
+  redundant because `silent_subgraph` is already the subgraph of silent states.
+- **`advntr/vntr_graph.py` line 23**: Replaced removed
+  `nx.connected_component_subgraphs(G)` (removed in networkx 2.4) with the
+  modern equivalent `(G.subgraph(c) for c in nx.connected_components(G))`.
+- **`advntr/vntr_graph.py` lines 14–17**: Replaced removed
+  `from networkx import graphviz_layout` import (moved in networkx ≥ 2.x) with
+  `nx.drawing.nx_agraph.graphviz_layout` inside a try/except that falls back to
+  spring layout when PyGraphviz is unavailable.
+
+#### Dependency updates
+- **`requirements.txt`**: `networkx==1.11` → `networkx>=2.6`; `biopython==1.76`
+  → `biopython>=1.76`; removed `enum34` (built-in since Python 3.4).
+- **`setup.py`**: `networkx==1.11` → `networkx>=2.6`;
+  `biopython` → `biopython>=1.76` in `install_requires`.
+
+#### Test data
+- Added `tests/data/HG00096.test.bam` + `.bai` index — subsampled from
+  `HG00096.final.cram` (GRCh38, chr1:560000–700000, ~27k reads, 1.8 MB).
+- Added `tests/data/HG00096.test.cram` + `.crai` index — same region in CRAM
+  format (725 KB). Contains VNTR ID 201 (chr1:627933) at full coverage.
+
+#### New tests (`tests/test_advntr_integration.py`)
+- **`TestCliValidation`** (8 tests): CLI argument validation — missing alignment
+  file, missing working directory, threads ≤ 0, `--expansion` without
+  `--coverage`, unsupported file extension, `--frameshift` with invalid VNTR ID.
+- **`TestAdVNTRCommandHelpers`** (5 tests): Unit tests for
+  `valid_vntr_for_frameshift` and `get_default_vntrs`.
+- **`TestGenotypeBAM`** (7 tests): End-to-end genotyping on the subsampled BAM
+  using the hg38 VNTR database — text/VCF/BED output formats, `--haploid` flag,
+  `--outfile`, and missing-file error reporting.
+- **`TestGenotypeCRAM`** (2 tests): CRAM genotyping with explicit reference FASTA;
+  BAM/CRAM output agreement. Skipped when reference FASTA is unavailable.
