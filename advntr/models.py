@@ -3,7 +3,9 @@ import sqlite3
 
 from multiprocessing import Process, Semaphore, Manager
 
-from Bio import Seq, SeqRecord, SeqIO
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 from advntr.reference_vntr import ReferenceVNTR
 
@@ -388,7 +390,7 @@ def find_similar_region_for_vntr(sema, reference_vntr, ref_file, result_list):
     search_index = vntr_id
     qfile = str(vntr_id) + "_" + str(search_index) + "_query.fasta"
     with open(qfile, "w") as output_handle:
-        my_rec = SeqRecord.SeqRecord(seq=Seq.Seq(q), id="query", description="")
+        my_rec = SeqRecord(seq=Seq(q), id="query", description="")
         SeqIO.write([my_rec], output_handle, "fasta")
     output = "blat_out/output_%s_%s.psl" % (vntr_id, search_index)
     command = (
@@ -414,15 +416,12 @@ def identify_similar_regions_for_vntrs_using_blat():
 
     records = []
     for ref_vntr in reference_vntrs:
-        record = SeqRecord.SeqRecord("")
         sequence = (
             ref_vntr.left_flanking_region[-30:]
             + ref_vntr.pattern
             + ref_vntr.right_flanking_region[:30]
         )
-        record.seq = Seq.Seq(sequence)
-        record.id = str(ref_vntr.id)
-        records.append(record)
+        records.append(SeqRecord(seq=Seq(sequence), id=str(ref_vntr.id)))
     vntr_structures_file = "reference_vntr_structures.fa"
     with open(vntr_structures_file, "w") as output_handle:
         SeqIO.write(records, output_handle, "fasta")

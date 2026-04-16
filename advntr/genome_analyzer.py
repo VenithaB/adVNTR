@@ -258,7 +258,7 @@ class GenomeAnalyzer:
                     )
                     vntr_read_ids[int(line[0])] = set(line[2:])
                 else:
-                    read = SeqRecord(line[1], line[0])
+                    read = SeqRecord(seq=line[1], id=line[0])
                     reads.append(read)
 
         return reads, vntr_read_ids

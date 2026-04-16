@@ -1,4 +1,6 @@
-from Bio import Seq, SeqRecord, SeqIO
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 from advntr.utils import get_chromosome_reference_sequence
 from advntr.models import load_unique_vntrs_data
@@ -8,7 +10,7 @@ def add_two_copy_to_all_patterns(patterns, start_points):
     file_name = "chr15.fa"
     fasta_sequences = SeqIO.parse(open(file_name), "fasta")
     sequence = ""
-    record = SeqRecord.SeqRecord("")
+    record = None
     for fasta in fasta_sequences:
         record = fasta
         sequence = str(fasta.seq)
@@ -19,7 +21,7 @@ def add_two_copy_to_all_patterns(patterns, start_points):
         sequence = sequence[:start_point] + pattern * 2 + sequence[start_point:]
         total_added_chars += len(pattern * 2)
 
-    record.seq = Seq.Seq(sequence)
+    record.seq = Seq(sequence)
     output_name = "edited_chr15_two_more_copies.fa"
     with open(output_name, "w") as output_handle:
         SeqIO.write([record], output_handle, "fasta")
@@ -40,8 +42,7 @@ def create_reference_with_indel(
         )
     else:
         sequence = left_flank + vntr[:position] + vntr[position + 1 :] + right_flank
-    record = SeqRecord.SeqRecord("")
-    record.seq = Seq.Seq(sequence)
+    record = SeqRecord(seq=Seq(sequence))
     with open(output_name, "w") as output_handle:
         SeqIO.write([record], output_handle, "fasta")
 
@@ -62,15 +63,12 @@ def create_cel_frameshifts(cel_vntr):
             + vntr[frameshift + 5 :]
             + right_flank
         )
-        record = SeqRecord.SeqRecord("")
-        record.seq = Seq.Seq(deletion)
         deletion_output_name = "chr9_cel_deletion_%s.fa" % str(frameshift)
         insertion_output_name = "chr9_cel_insertion_%s.fa" % str(frameshift + 5)
         with open(deletion_output_name, "w") as output_handle:
-            SeqIO.write([record], output_handle, "fasta")
-        record.seq = Seq.Seq(insertion)
+            SeqIO.write([SeqRecord(seq=Seq(deletion))], output_handle, "fasta")
         with open(insertion_output_name, "w") as output_handle:
-            SeqIO.write([record], output_handle, "fasta")
+            SeqIO.write([SeqRecord(seq=Seq(insertion))], output_handle, "fasta")
 
 
 def create_reference_region_with_specific_repeats(
@@ -80,7 +78,6 @@ def create_reference_region_with_specific_repeats(
     flanks=30000,
     repeat_patterns=None,
 ):
-    record = SeqRecord.SeqRecord("")
     sequence = get_chromosome_reference_sequence(reference_vntr.chromosome)
     vntr_end = reference_vntr.start_point + reference_vntr.get_length()
     if flanks is None:
@@ -98,7 +95,7 @@ def create_reference_region_with_specific_repeats(
         new_sequence += repeats[i % len(repeats)]
     new_sequence += sequence[vntr_end:region_end]
 
-    record.seq = Seq.Seq(new_sequence)
+    record = SeqRecord(seq=Seq(new_sequence))
     with open(output_name, "w") as output_handle:
         SeqIO.write([record], output_handle, "fasta")
 

@@ -1,4 +1,5 @@
-from Bio import SeqIO, Seq
+from Bio import SeqIO
+from Bio.Seq import Seq
 from advntr.distance import get_nucleotide_map, nucleotide_dist
 
 
@@ -19,7 +20,7 @@ def match_query_by_sliding_windows(
 
 def get_candid_reads_by_sliding_window_method(query, number_of_copies, fastq_files):
     candid_reads = []
-    reversed_complement_query = str(Seq.Seq(query).reverse_complement())
+    reversed_complement_query = str(Seq(query).reverse_complement())
     query_acgt_content = get_nucleotide_map(query)
     rc_query_acgt_content = get_nucleotide_map(reversed_complement_query)
     for fastq_file in fastq_files:

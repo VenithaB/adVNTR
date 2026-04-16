@@ -7,8 +7,9 @@ import numpy as np
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation
 
-from Bio.SeqIO import SeqRecord
-from Bio import SeqIO, Seq
+from Bio.SeqRecord import SeqRecord
+from Bio import SeqIO
+from Bio.Seq import Seq
 
 from advntr.sam_utils import (
     get_id_of_reads_mapped_to_vntr_in_bamfile,
@@ -184,9 +185,9 @@ def get_hmm_accuracy(vntr_finder, simulated_true_reads, simulated_false_filtered
     fasta_file = blast_dir + "reads.fasta"
     records = []
     for i, read in enumerate(simulated_false_filtered_reads):
-        records.append(SeqRecord(seq=Seq.Seq(read), id="fasle_%s" % i))
+        records.append(SeqRecord(seq=Seq(read), id="fasle_%s" % i))
     for i, read in enumerate(simulated_true_reads):
-        records.append(SeqRecord(seq=Seq.Seq(read), id="true_%s" % i))
+        records.append(SeqRecord(seq=Seq(read), id="true_%s" % i))
     with open(fasta_file, "w") as output_handle:
         SeqIO.write(records, output_handle, "fasta")
 
@@ -413,10 +414,7 @@ def select_positive_and_negative_reads_with_bowtie(reads, vntr_finder, label):
 
     records = []
     for i, read in enumerate(reads):
-        record = SeqRecord("")
-        record.seq = Seq.Seq(read)
-        record.id = "read_%s/1" % str(i)
-        records.append(record)
+        records.append(SeqRecord(seq=Seq(read), id="read_%s/1" % str(i)))
     with open(fq_file, "w") as output_handle:
         SeqIO.write(records, output_handle, "fasta")
 
