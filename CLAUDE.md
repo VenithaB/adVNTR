@@ -158,6 +158,20 @@ adVNTR/
 - Added `tests/data/HG00096.test.cram` + `.crai` index — same region in CRAM
   format (725 KB). Contains VNTR ID 201 (chr1:627933) at full coverage.
 
+#### Biopython pairwise2 migration (Step 3)
+- **`advntr/pattern_clustering.py`**: `Bio.pairwise2.align.globalms/globalxx` → module-level
+  `PairwiseAligner` instances with `.score()` calls.
+- **`advntr/reference_vntr.py`**: `pairwise2.align.localms(score_only=True)` →
+  `_LOCAL_ALIGNER.score()`.
+- **`advntr/vntr_finder.py`**: 4 pairwise2 calls — `globalms` in
+  `get_unique_{left,right}_flank` → `.score()`; `localms` in
+  `check_if_flanking_regions_align_to_str` → `.align()` with `aln.score` and
+  `aln.path[0][1]` for begin position.
+- **`advntr/pairwise_aln_generator.py`**: `globalms` in `find_best_repeat_unit` →
+  `.align()` with gapped sequences extracted via `str(aln).split('\\n')`.
+- Gap penalty mapping: `pairwise2(open=-1, extend=-1)` ≡ `PairwiseAligner(open_gap_score=0,
+  extend_gap_score=-1)` since both give gap-of-n cost = −n.
+
 #### New tests (`tests/test_advntr_integration.py`)
 - **`TestCliValidation`** (8 tests): CLI argument validation — missing alignment
   file, missing working directory, threads ≤ 0, `--expansion` without
