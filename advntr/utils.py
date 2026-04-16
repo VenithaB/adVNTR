@@ -1,6 +1,9 @@
 import logging
+import os
+import subprocess
+import tempfile
 
-from Bio import SeqIO
+from Bio import AlignIO, SeqIO
 
 from advntr.settings import (
     HG19_DIR,
@@ -8,6 +11,29 @@ from advntr.settings import (
     MAPQ_CUTOFF,
     QUALITY_SCORE_CUTOFF,
 )
+
+
+def run_muscle_alignment(sequences: list[str]) -> list[str]:
+    """Align sequences with muscle v5+, returning aligned sequences in input order."""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".fa", delete=False) as f:
+        for i, seq in enumerate(sequences):
+            f.write(f">{i}\n{seq}\n")
+        input_path = f.name
+    output_path = input_path + "_aln.fa"
+    try:
+        subprocess.run(
+            ["muscle", "-align", input_path, "-output", output_path],
+            capture_output=True,
+            check=True,
+        )
+        alignment = AlignIO.read(output_path, "fasta")
+        # muscle v5 may reorder — restore original order by numeric id
+        ordered = sorted(alignment, key=lambda r: int(r.id))
+        return [str(r.seq) for r in ordered]
+    finally:
+        os.unlink(input_path)
+        if os.path.exists(output_path):
+            os.unlink(output_path)
 
 
 def get_min_number_of_copies_to_span_read(pattern, read_length=150):

@@ -1,12 +1,8 @@
 import logging
 
-from io import StringIO
-
-from Bio.Align.Applications import MuscleCommandline
-from Bio import AlignIO
-
 from advntr.distance import hamming
 from advntr.hierarchical_clustering import hierarchical_clustering
+from advntr.utils import run_muscle_alignment
 
 
 class PacBioHaplotyper:
@@ -40,13 +36,7 @@ class PacBioHaplotyper:
                 )
                 haplotypes.append(cluster[0])
                 continue
-            muscle_cline = MuscleCommandline("muscle", clwstrict=True)
-            data = "\n".join(
-                [">%s\n" % str(i) + cluster[i] for i in range(len(cluster))]
-            )
-            stdout, stderr = muscle_cline(stdin=data)
-            alignment = AlignIO.read(StringIO(stdout), "clustal")
-            aligned_reads = [str(aligned.seq) for aligned in alignment]
+            aligned_reads = run_muscle_alignment(cluster)
             seq = self.get_consensus_sequence_from_multiple_alignment(aligned_reads)
             haplotypes.append(seq)
         if len(haplotypes) < 2:
@@ -78,14 +68,8 @@ class PacBioHaplotyper:
     def get_read_clusters(self, number_of_clusters=2):
         """Cluster reads to two groups based on informative base pairs
         to separate the reads of each haplotype."""
-        muscle_cline = MuscleCommandline("muscle", clwstrict=True)
-        data = "\n".join(
-            [">%s\n" % str(i) + self.reads[i] for i in range(len(self.reads))]
-        )
-        stdout, stderr = muscle_cline(stdin=data)
-        alignment = AlignIO.read(StringIO(stdout), "clustal")
-        aligned_reads = [str(aligned.seq) for aligned in alignment]
-        aligned_read_ids = [str(aligned.id) for aligned in alignment]
+        aligned_reads = run_muscle_alignment(self.reads)
+        aligned_read_ids = [str(i) for i in range(len(self.reads))]
 
         seqs = self.get_informative_columns(aligned_reads)
         distance_matrix = []

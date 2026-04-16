@@ -1,15 +1,13 @@
 from collections import defaultdict
 from collections import Counter
-from io import StringIO
 import argparse
 import glob
 import os.path
 
-from Bio.Align.Applications import MuscleCommandline
 from Bio.Align import PairwiseAligner
-from Bio import AlignIO
 
 from advntr.models import load_unique_vntrs_data
+from advntr.utils import run_muscle_alignment
 
 # gap-of-n cost = open + (n-1)*extend = -n; PairwiseAligner open_gap_score = open-extend = 0
 _GLOBAL_ALIGNER = PairwiseAligner(
@@ -22,13 +20,8 @@ _GLOBAL_ALIGNER = PairwiseAligner(
 
 
 def get_consensus_pattern(patterns):
-    aligned_patterns = None
     if len(patterns) > 1:
-        muscle_cline = MuscleCommandline("muscle", clwstrict=True)
-        data = "\n".join([">%s\n" % str(i) + patterns[i] for i in range(len(patterns))])
-        stdout, stderr = muscle_cline(stdin=data)
-        alignment = AlignIO.read(StringIO(stdout), "clustal")
-        aligned_patterns = [str(aligned.seq) for aligned in alignment]
+        aligned_patterns = run_muscle_alignment(patterns)
     else:
         aligned_patterns = patterns
 

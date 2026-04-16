@@ -1,9 +1,5 @@
-from io import StringIO
-
-from Bio.Align.Applications import MuscleCommandline
-from Bio import AlignIO
-
 from advntr.profiler import time_usage
+from advntr.utils import run_muscle_alignment
 
 
 @time_usage
@@ -176,11 +172,7 @@ def build_profile_hmm_pseudocounts_for_alignment(error_rate, alignment):
 @time_usage
 def build_profile_hmm_for_repeats(repeats, error_rate):
     if len(repeats) > 1:
-        muscle_cline = MuscleCommandline("muscle", clwstrict=True)
-        data = "\n".join([">%s\n" % str(i) + repeats[i] for i in range(len(repeats))])
-        stdout, stderr = muscle_cline(stdin=data)
-        alignment = AlignIO.read(StringIO(stdout), "clustal")
-        aligned_repeats = [str(aligned.seq) for aligned in alignment]
+        aligned_repeats = run_muscle_alignment(repeats)
     else:
         aligned_repeats = repeats
 

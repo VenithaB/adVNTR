@@ -272,7 +272,7 @@ cdef class HiddenMarkovModel( GraphModel ):
 
         # Get all the edges from the graph
         edges = []
-        for start, end, data in self.graph.edges_iter( data=True ):
+        for start, end, data in self.graph.edges( data=True ):
             # If this edge is part of a group of tied edges, annotate this group
             # it is a part of
             s, e = indices[start], indices[end]
@@ -967,7 +967,7 @@ cdef class HiddenMarkovModel( GraphModel ):
         # such a manner that all edges pointing to the same node are grouped
         # together. This will allow us to run the algorithms in time
         # nodes*edges instead of nodes*nodes.
-        for a, b in self.graph.edges_iter():
+        for a, b in self.graph.edges():
             # Increment the total number of edges going to node b.
             self.in_edge_count[ indices[b]+1 ] += 1
             # Increment the total number of edges leaving node a.
@@ -991,7 +991,7 @@ cdef class HiddenMarkovModel( GraphModel ):
         # Now we go through the edges again in order to both fill in the
         # transition probability matrix, and also to store the indices sorted
         # by the end-node.
-        for a, b, data in self.graph.edges_iter(data=True):
+        for a, b, data in self.graph.edges(data=True):
             # Put the edge in the dict. Its weight is log-probability
             start = self.in_edge_count[ indices[b] ]
 
@@ -3073,7 +3073,7 @@ cdef class HiddenMarkovModel( GraphModel ):
 
         # Get all the edges from the graph
         edges = []
-        for start, end, data in self.graph.edges_iter( data=True ):
+        for start, end, data in self.graph.edges( data=True ):
             # If this edge is part of a group of tied edges, annotate this group
             # it is a part of
             s, e = indices[start], indices[end]
