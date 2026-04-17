@@ -15,17 +15,23 @@ class TestGenotyping(unittest.TestCase):
     def test_statistical_model_for_haploid_case(self):
         vntr_finder = VNTRFinder(self.get_reference_vntr())
         # find_genotype_based_on_observed_repeats returns (copy_numbers, max_prob)
-        copy_numbers, _ = vntr_finder.find_genotype_based_on_observed_repeats([3, 3, 3, 3, 3])
+        copy_numbers, _ = vntr_finder.find_genotype_based_on_observed_repeats(
+            [3, 3, 3, 3, 3]
+        )
         self.assertEqual(copy_numbers, (3, 3))
 
     def test_statistical_model_for_haploid_organism(self):
         vntr_finder = VNTRFinder(self.get_reference_vntr(), is_haploid=True)
-        copy_numbers, _ = vntr_finder.find_genotype_based_on_observed_repeats([2, 3, 3, 3, 3])
+        copy_numbers, _ = vntr_finder.find_genotype_based_on_observed_repeats(
+            [2, 3, 3, 3, 3]
+        )
         self.assertEqual(copy_numbers, (3, 3))
 
     def test_statistical_model_for_diploid_case(self):
         vntr_finder = VNTRFinder(self.get_reference_vntr())
-        copy_numbers, _ = vntr_finder.find_genotype_based_on_observed_repeats([2, 2, 3, 3, 3])
+        copy_numbers, _ = vntr_finder.find_genotype_based_on_observed_repeats(
+            [2, 2, 3, 3, 3]
+        )
         if copy_numbers[0] > copy_numbers[1]:
             copy_numbers = (copy_numbers[1], copy_numbers[0])
         self.assertEqual(copy_numbers, (2, 3))

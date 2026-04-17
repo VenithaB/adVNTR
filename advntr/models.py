@@ -175,14 +175,12 @@ def create_vntrs_database(db_file):
         os.makedirs(os.path.dirname(db_file))
     db = sqlite3.connect(db_file)
     cursor = db.cursor()
-    cursor.execute(
-        """CREATE TABLE vntrs(
+    cursor.execute("""CREATE TABLE vntrs(
         id INTEGER PRIMARY KEY, nonoverlapping TEXT, chromosome TEXT,
         ref_start INTEGER, gene_name TEXT, annotation TEXT, pattern TEXT,
         left_flanking TEXT, right_flanking TEXT, repeats TEXT,
         scaled_score REAL default 0
-    )"""
-    )
+    )""")
 
     db.commit()
     db.close()

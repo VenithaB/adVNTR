@@ -88,7 +88,8 @@ class TestCliValidation:
         with tempfile.TemporaryDirectory() as wd:
             result = run_advntr(
                 "genotype",
-                "--working_directory", wd,
+                "--working_directory",
+                wd,
             )
         assert result.returncode != 0
 
@@ -97,7 +98,8 @@ class TestCliValidation:
         dummy_bam.touch()
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(dummy_bam),
+            "--alignment_file",
+            str(dummy_bam),
         )
         assert result.returncode != 0
 
@@ -106,9 +108,12 @@ class TestCliValidation:
         dummy_bam.touch()
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(dummy_bam),
-            "--working_directory", str(tmp_path),
-            "--threads", "0",
+            "--alignment_file",
+            str(dummy_bam),
+            "--working_directory",
+            str(tmp_path),
+            "--threads",
+            "0",
         )
         assert result.returncode != 0
 
@@ -117,9 +122,12 @@ class TestCliValidation:
         dummy_bam.touch()
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(dummy_bam),
-            "--working_directory", str(tmp_path),
-            "--threads", "-1",
+            "--alignment_file",
+            str(dummy_bam),
+            "--working_directory",
+            str(tmp_path),
+            "--threads",
+            "-1",
         )
         assert result.returncode != 0
 
@@ -128,8 +136,10 @@ class TestCliValidation:
         dummy_bam.touch()
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(dummy_bam),
-            "--working_directory", str(tmp_path),
+            "--alignment_file",
+            str(dummy_bam),
+            "--working_directory",
+            str(tmp_path),
             "--expansion",
         )
         assert result.returncode != 0
@@ -140,8 +150,10 @@ class TestCliValidation:
         txt_file.touch()
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(txt_file),
-            "--working_directory", str(tmp_path),
+            "--alignment_file",
+            str(txt_file),
+            "--working_directory",
+            str(tmp_path),
         )
         assert result.returncode != 0
 
@@ -151,10 +163,13 @@ class TestCliValidation:
         dummy_bam.touch()
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(dummy_bam),
-            "--working_directory", str(tmp_path),
+            "--alignment_file",
+            str(dummy_bam),
+            "--working_directory",
+            str(tmp_path),
             "--frameshift",
-            "--vntr_id", "999999",
+            "--vntr_id",
+            "999999",
         )
         assert result.returncode != 0
 
@@ -229,26 +244,36 @@ class TestGenotypeBAM:
         """adVNTR genotype should complete without error for VNTR 201."""
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(TEST_BAM),
-            "--models", str(HG38_DB),
-            "--working_directory", str(tmp_path),
-            "--vntr_id", VNTR_ID_IN_REGION,
-            "--threads", "1",
+            "--alignment_file",
+            str(TEST_BAM),
+            "--models",
+            str(HG38_DB),
+            "--working_directory",
+            str(tmp_path),
+            "--vntr_id",
+            VNTR_ID_IN_REGION,
+            "--threads",
+            "1",
             "--disable_logging",
         )
-        assert result.returncode == 0, (
-            f"advntr genotype failed.\nstdout: {result.stdout}\nstderr: {result.stderr}"
-        )
+        assert (
+            result.returncode == 0
+        ), f"advntr genotype failed.\nstdout: {result.stdout}\nstderr: {result.stderr}"
 
     def test_genotype_output_contains_vntr_id(self, tmp_path):
         """Output must mention the queried VNTR ID."""
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(TEST_BAM),
-            "--models", str(HG38_DB),
-            "--working_directory", str(tmp_path),
-            "--vntr_id", VNTR_ID_IN_REGION,
-            "--threads", "1",
+            "--alignment_file",
+            str(TEST_BAM),
+            "--models",
+            str(HG38_DB),
+            "--working_directory",
+            str(tmp_path),
+            "--vntr_id",
+            VNTR_ID_IN_REGION,
+            "--threads",
+            "1",
             "--disable_logging",
         )
         assert result.returncode == 0
@@ -258,27 +283,41 @@ class TestGenotypeBAM:
         """VCF output format should produce a header line starting with #."""
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(TEST_BAM),
-            "--models", str(HG38_DB),
-            "--working_directory", str(tmp_path),
-            "--vntr_id", VNTR_ID_IN_REGION,
-            "--outfmt", "vcf",
-            "--threads", "1",
+            "--alignment_file",
+            str(TEST_BAM),
+            "--models",
+            str(HG38_DB),
+            "--working_directory",
+            str(tmp_path),
+            "--vntr_id",
+            VNTR_ID_IN_REGION,
+            "--outfmt",
+            "vcf",
+            "--threads",
+            "1",
             "--disable_logging",
         )
         assert result.returncode == 0
-        assert "#" in result.stdout, "VCF output should contain header lines starting with #"
+        assert (
+            "#" in result.stdout
+        ), "VCF output should contain header lines starting with #"
 
     def test_genotype_bed_output_format(self, tmp_path):
         """BED output should not crash and should produce tab-separated lines."""
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(TEST_BAM),
-            "--models", str(HG38_DB),
-            "--working_directory", str(tmp_path),
-            "--vntr_id", VNTR_ID_IN_REGION,
-            "--outfmt", "bed",
-            "--threads", "1",
+            "--alignment_file",
+            str(TEST_BAM),
+            "--models",
+            str(HG38_DB),
+            "--working_directory",
+            str(tmp_path),
+            "--vntr_id",
+            VNTR_ID_IN_REGION,
+            "--outfmt",
+            "bed",
+            "--threads",
+            "1",
             "--disable_logging",
         )
         assert result.returncode == 0
@@ -287,12 +326,17 @@ class TestGenotypeBAM:
         """--haploid flag should not crash."""
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(TEST_BAM),
-            "--models", str(HG38_DB),
-            "--working_directory", str(tmp_path),
-            "--vntr_id", VNTR_ID_IN_REGION,
+            "--alignment_file",
+            str(TEST_BAM),
+            "--models",
+            str(HG38_DB),
+            "--working_directory",
+            str(tmp_path),
+            "--vntr_id",
+            VNTR_ID_IN_REGION,
             "--haploid",
-            "--threads", "1",
+            "--threads",
+            "1",
             "--disable_logging",
         )
         assert result.returncode == 0
@@ -302,12 +346,18 @@ class TestGenotypeBAM:
         outfile = tmp_path / "results.txt"
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(TEST_BAM),
-            "--models", str(HG38_DB),
-            "--working_directory", str(tmp_path),
-            "--vntr_id", VNTR_ID_IN_REGION,
-            "--outfile", str(outfile),
-            "--threads", "1",
+            "--alignment_file",
+            str(TEST_BAM),
+            "--models",
+            str(HG38_DB),
+            "--working_directory",
+            str(tmp_path),
+            "--vntr_id",
+            VNTR_ID_IN_REGION,
+            "--outfile",
+            str(outfile),
+            "--threads",
+            "1",
             "--disable_logging",
         )
         assert result.returncode == 0
@@ -324,11 +374,16 @@ class TestGenotypeBAM:
         """
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(tmp_path / "nonexistent.bam"),
-            "--models", str(HG38_DB),
-            "--working_directory", str(tmp_path),
-            "--vntr_id", VNTR_ID_IN_REGION,
-            "--threads", "1",
+            "--alignment_file",
+            str(tmp_path / "nonexistent.bam"),
+            "--models",
+            str(HG38_DB),
+            "--working_directory",
+            str(tmp_path),
+            "--vntr_id",
+            VNTR_ID_IN_REGION,
+            "--threads",
+            "1",
         )
         assert "Error" in result.stdout or result.returncode != 0
 
@@ -344,17 +399,23 @@ class TestGenotypeCRAM:
         """adVNTR should accept a CRAM file with an explicit reference."""
         result = run_advntr(
             "genotype",
-            "--alignment_file", str(TEST_CRAM),
-            "--reference_filename", str(REFERENCE_FA),
-            "--models", str(HG38_DB),
-            "--working_directory", str(tmp_path),
-            "--vntr_id", VNTR_ID_IN_REGION,
-            "--threads", "1",
+            "--alignment_file",
+            str(TEST_CRAM),
+            "--reference_filename",
+            str(REFERENCE_FA),
+            "--models",
+            str(HG38_DB),
+            "--working_directory",
+            str(tmp_path),
+            "--vntr_id",
+            VNTR_ID_IN_REGION,
+            "--threads",
+            "1",
             "--disable_logging",
         )
-        assert result.returncode == 0, (
-            f"advntr genotype (CRAM) failed.\nstdout: {result.stdout}\nstderr: {result.stderr}"
-        )
+        assert (
+            result.returncode == 0
+        ), f"advntr genotype (CRAM) failed.\nstdout: {result.stdout}\nstderr: {result.stderr}"
 
     def test_cram_and_bam_produce_same_vntr_id_in_output(self, tmp_path):
         """BAM and CRAM from the same reads should both report VNTR ID 201."""
@@ -365,21 +426,32 @@ class TestGenotypeCRAM:
 
         bam_result = run_advntr(
             "genotype",
-            "--alignment_file", str(TEST_BAM),
-            "--models", str(HG38_DB),
-            "--working_directory", str(bam_dir),
-            "--vntr_id", VNTR_ID_IN_REGION,
-            "--threads", "1",
+            "--alignment_file",
+            str(TEST_BAM),
+            "--models",
+            str(HG38_DB),
+            "--working_directory",
+            str(bam_dir),
+            "--vntr_id",
+            VNTR_ID_IN_REGION,
+            "--threads",
+            "1",
             "--disable_logging",
         )
         cram_result = run_advntr(
             "genotype",
-            "--alignment_file", str(TEST_CRAM),
-            "--reference_filename", str(REFERENCE_FA),
-            "--models", str(HG38_DB),
-            "--working_directory", str(cram_dir),
-            "--vntr_id", VNTR_ID_IN_REGION,
-            "--threads", "1",
+            "--alignment_file",
+            str(TEST_CRAM),
+            "--reference_filename",
+            str(REFERENCE_FA),
+            "--models",
+            str(HG38_DB),
+            "--working_directory",
+            str(cram_dir),
+            "--vntr_id",
+            VNTR_ID_IN_REGION,
+            "--threads",
+            "1",
             "--disable_logging",
         )
         assert bam_result.returncode == 0

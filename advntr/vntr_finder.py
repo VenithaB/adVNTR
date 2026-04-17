@@ -36,10 +36,18 @@ from pomegranate import HiddenMarkovModel as Model  # type: ignore[attr-defined]
 
 # gap-of-n cost = open + (n-1)*extend = -n; PairwiseAligner open_gap_score = open-extend = 0
 _GLOBAL_ALIGNER = PairwiseAligner(
-    mode="global", match_score=1, mismatch_score=-1, open_gap_score=0, extend_gap_score=-1
+    mode="global",
+    match_score=1,
+    mismatch_score=-1,
+    open_gap_score=0,
+    extend_gap_score=-1,
 )
 _LOCAL_ALIGNER = PairwiseAligner(
-    mode="local", match_score=1, mismatch_score=-1, open_gap_score=0, extend_gap_score=-1
+    mode="local",
+    match_score=1,
+    mismatch_score=-1,
+    open_gap_score=0,
+    extend_gap_score=-1,
 )
 
 

@@ -314,7 +314,9 @@ def get_intron_count(vntr_start, vntr_end, chromosome, regions):
     for start, end, identifier, direction in regions[chromosome]:
         if intersect(start, end, vntr_start, vntr_end):
             if gene_reference == "ucsc":  # noqa: F821
-                _gene_name = get_gene_name_from_ucsc_id(identifier.split("_")[0])  # noqa: F841
+                _gene_name = get_gene_name_from_ucsc_id(
+                    identifier.split("_")[0]
+                )  # noqa: F841
             else:
                 _gene_name = get_gene_name_from_refseq_id(  # noqa: F841
                     identifier.split(".")[0], name_mapping  # noqa: F821
