@@ -1,98 +1,238 @@
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square)](http://bioconda.github.io/recipes/advntr/README.html)
-[![Anaconda-Server Badge](https://anaconda.org/bioconda/advntr/badges/downloads.svg)](https://anaconda.org/bioconda/advntr)
-[![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=stable)](http://pip.pypa.io/en/stable/?badge=stable)
+# adVNTR — Modernized Fork
 
-adVNTR - A tool for genotyping VNTRs
-------------------------------------
-[adVNTR](https://github.com/mehrdadbakhtiari/adVNTR/) is a tool for genotyping Variable Number Tandem Repeats (VNTR)
-from sequence data. It works with both NGS short reads (Illumina HiSeq) and SMRT reads (PacBio) and finds
-diploid repeating counts for VNTRs and identifies possible mutations in the VNTR sequences.
+This is a modernized fork of [adVNTR](https://github.com/mehrdadbakhtiari/adVNTR), a tool for genotyping Variable Number Tandem Repeats (VNTRs) from short-read (Illumina) and long-read (PacBio, Nanopore) sequencing data using Hidden Markov Models.
 
-[code-adVNTR](https://github.com/mehrdadbakhtiari/adVNTR/tree/enhanced_hmm), a tool specialized in detecting small indel variants within motifs using short reads is now available. 
-This tool employs multiple motif Hidden Markov Models (HMMs) to identify small variants within motifs and estimate diploid repeat counts for VNTRs specifically in coding regions. For more details, please refer to this [readme](https://github.com/mehrdadbakhtiari/adVNTR/tree/enhanced_hmm).
+**What this fork fixes:** The original adVNTR 1.5.0 fails to run on modern Python environments due to incompatible dependency APIs. This fork updates those API calls without changing any core algorithm or output format.
 
-Installation
-------------
-If you are using the conda packaging manager (e.g. [miniconda](https://docs.conda.io/en/latest/miniconda.html) or anaconda),
-you can install adVNTR from the [bioconda  channel](https://bioconda.github.io/):
+---
 
-    conda config --add channels bioconda
-    conda install -c conda-forge -c bioconda advntr
+## Changes from upstream
 
-adVNTR could be invoked from command line with ``advntr``
+| Component | Issue | Fix |
+|-----------|-------|-----|
+| `pomegranate/hmm.pyx` | `networkx.topological_sort()` no longer accepts `nbunch=` argument (removed in networkx ≥ 2.6) | Removed deprecated `nbunch` keyword |
+| `advntr/vntr_graph.py` | `nx.connected_component_subgraphs()` removed in networkx 2.4 | Replaced with `(G.subgraph(c) for c in nx.connected_components(G))` |
+| `advntr/vntr_graph.py` | `from networkx import graphviz_layout` removed in networkx ≥ 2.x | Replaced with `nx.drawing.nx_agraph.graphviz_layout` with fallback to spring layout |
+| `advntr/vntr_finder.py`, `advntr/reference_vntr.py`, `advntr/pattern_clustering.py`, `advntr/pairwise_aln_generator.py` | `Bio.pairwise2` deprecated and removed in Biopython ≥ 1.80 | Migrated all calls to `Bio.Align.PairwiseAligner` |
+| `requirements.txt` / `setup.py` | Pinned `networkx==1.11`, `biopython==1.76`, included `enum34` (built-in since Python 3.4) | Updated to `networkx>=2.6`, `biopython>=1.76`, removed `enum34` |
 
-Alternatively, you can install dependencies and [install the adVNTR from source](http://advntr.readthedocs.io/en/latest/installation.html#install-from-source-not-recommended).
+---
 
+## Installation
 
-Data Requirements and Pre-trained Models (Databases)
------------------
-In order to genotype VNTRs, you need to either train models for loci of interest or use pre-trained models (recommended):
-* To run adVNTR on trained VNTR models:
-    - Download [vntr_data_recommended_loci.zip](https://cseweb.ucsd.edu/~mbakhtia/adVNTR/vntr_data_recommended_loci.zip)
-    and extract it inside the project directory. This includes a set of pre-trained VNTR models in hg19 for Illumina (6719 loci)
-    and Pacbio (8960 loci) sequencing data. You can use [vntr_data_recommended_loci_hg38.zip](https://cseweb.ucsd.edu/~mbakhtia/adVNTR/vntr_data_recommended_loci_hg38.zip) for VNTRs in GRCh38.
-    - You can also download and use [vntr_data_genic_loci.zip](https://cseweb.ucsd.edu/~mbakhtia/adVNTR/vntr_data_genic_loci.zip)
-    for 158522 VNTRs in hg19 that results in having much longer running time.
-    - You can download the database for the gene-proximal and phenotype associated VNTRs [G-VNTRs and P-VNTRs database](https://drive.google.com/file/d/1rF1CIliwzFcJmrCU2ibMVVZncsU6uNcs/view?usp=share_link) based on the GRCh38 reference.
-    - Alternatively you can download the BED file for gene-proximal VNTRs [gene_proximal_vntrs.bed](https://drive.google.com/file/d/1DetpBQySPNe2YAJa4FsjHn9qiRNS3wEV/view?usp=share_link) for VNTRs in GRCh38.
-    - The VNTR coordinates (GRCh38) utilized for GIAB TR benchmarking can be downloaded from [this link](https://drive.google.com/file/d/1FCk4HeXQMBiwnXeLucmIgSrz2qcmEcts/view?usp=drive_link).
+**Requirements:** Python 3.8+, conda recommended.
 
-Alternatively, you can add model for custom VNTR. See [Add Custom VNTR](http://advntr.readthedocs.io/en/latest/tutorial.html#add-custom-vntr-label) for more information about training models for custom VNTRs.
+```bash
+# Clone this fork
+git clone https://github.com/VenithaB/adVNTR.git
+cd adVNTR
 
-[Optional] For faster genotyping with adVNTR-NN, pretrained neural network models can be downloaded from [here](https://drive.google.com/drive/folders/1xeIoaE_iX4JojfKjlUkqXQ0iONPR5Zax?usp=sharing).
+# Create and activate environment
+conda create -n advntr_env python=3.11
+conda activate advntr_env
 
-Execution:
-----------
-Use following command to see the help for running the tool.
-
-    advntr --help
-
-The program outputs the RU count genotypes of trained VNTRs. To specify a single VNTR by its ID use ``--vntr_id <id>`` option.
-The list of some known VNTRs and their ID is available at [Disease-linked-VNTRs page](https://github.com/mehrdadbakhtiari/adVNTR/wiki/Disease-linked-VNTRs) in wiki.
-
-See the demo below or [Quickstart](http://advntr.readthedocs.io/en/latest/quickstart.html) page to see an example
-data set with step-by-step genotyping commands.
-
-Demo input in BAM format
-------------------------
-* ``--alignment_file`` specifies the alignment file containing mapped and unmapped reads:
-
-```sh
-    advntr genotype --alignment_file aligned_illumina_reads.bam --working_directory ./log_dir/
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-* With ``--pacbio``, adVNTR assumes the alignment file contains PacBio sequencing data:
+### Running without installing
 
-```sh
-    advntr genotype --alignment_file aligned_pacbio_reads.bam --working_directory ./log_dir/ --pacbio
+Since this fork is not published to PyPI, run it directly by setting `PYTHONPATH`:
+
+```bash
+PYTHONPATH=/path/to/adVNTR conda run -n advntr_env python -m advntr genotype [options]
 ```
 
-* Use ``--frameshift`` to find the possible frameshifts in VNTR:
+This takes precedence over any installed `advntr` package in the environment.
 
-```sh
-    advntr genotype --alignment_file aligned_illumina_reads.bam --working_directory ./log_dir/ --frameshift
+---
+
+## VNTR database
+
+A pre-built database of VNTR models is required. It is not included in this repository.
+
+| Database | Loci | Reference | Format |
+|----------|------|-----------|--------|
+| `hg38_selected_VNTRs_Illumina.db` | 10,264 | GRCh38 | SQLite `.db` |
+| `vntr_data_recommended_loci.zip` | 6,719 (Illumina) / 8,960 (PacBio) | hg19 | Download from upstream |
+| `vntr_data_recommended_loci_hg38.zip` | — | GRCh38 | Download from upstream |
+
+Pass the database path with `-m/--models`.
+
+---
+
+## Input files
+
+| File | Flag | Format | Notes |
+|------|------|--------|-------|
+| Alignment file | `-a/--alignment_file` | SAM, BAM, or CRAM | Must be coordinate-sorted and indexed (`.bai` / `.crai`). **Do not use `-f/--fasta` for alignment files** — that flag is for raw FASTA reads only. |
+| Reference genome | `-r/--reference_filename` | FASTA (`.fa` / `.fasta`) | **Required for CRAM input.** Optional for BAM/SAM. |
+| VNTR models database | `-m/--models` | SQLite `.db` | Defaults to `vntr_data/hg19_selected_VNTRs_Illumina.db` if not specified. |
+
+---
+
+## Usage
+
+### Basic Illumina genotyping (BAM)
+
+```bash
+advntr genotype \
+    --alignment_file sample.bam \
+    --models /path/to/hg38_selected_VNTRs_Illumina.db \
+    --working_directory ./working_dir/ \
+    --outfile results.vcf \
+    --outfmt vcf
 ```
 
-Documentation:
---------------
-Documentation is available at [advntr.readthedocs.io](http://advntr.readthedocs.io).
+### CRAM input (reference required)
 
-See [Quickstart](http://advntr.readthedocs.io/en/latest/quickstart.html) page to see an example data set with step-by-step genotyping commands.
+```bash
+advntr genotype \
+    --alignment_file sample.cram \
+    --reference_filename /path/to/GRCh38.fa \
+    --models /path/to/hg38_selected_VNTRs_Illumina.db \
+    --working_directory ./working_dir/ \
+    --outfile results.vcf \
+    --outfmt vcf
+```
 
-Citation:
----------
-- code-adVNTR:
+### Genotype a single locus
 
-    Jonghun Park, Mehrdad Bakhtiari, Bernt Popp, Michael Wiesener, Vineet Bafna.
-    <b>[Detecting tandem repeat variants in coding regions using code-adVNTR](https://doi.org/10.1016/j.isci.2022.104785) </b> iScience vol. 25,8 104785. (2022),
+```bash
+advntr genotype \
+    --alignment_file sample.bam \
+    --models /path/to/hg38_selected_VNTRs_Illumina.db \
+    --working_directory ./working_dir/ \
+    --vntr_id 201
+```
 
-- adVNTR-NN (v1.4.0):
+### PacBio long reads
 
-    Mehrdad Bakhtiari, Jonghun Park, Yuan-Chun Ding, Sharona Shleizer-Burko, Susan L. Neuhausen, Bjarni V. Halldorsson, 
-    Kari Stefansson, Melissa Gymrek, Vineet Bafna. <b>[Variable Number Tandem Repeats mediate the expression of proximal genes](https://doi.org/10.1038/s41467-021-22206-z) </b> 
-    Nature Communications 12, 2075 (2021).
+```bash
+advntr genotype \
+    --alignment_file sample_pacbio.bam \
+    --models /path/to/hg38_selected_VNTRs_Illumina.db \
+    --working_directory ./working_dir/ \
+    --pacbio
+```
 
-- Original publication (adVNTR):
+---
 
-    Bakhtiari, M., Shleizer-Burko, S., Gymrek, M., Bansal, V. and Bafna, V., 2018. 
-    <b>[Targeted genotyping of variable number tandem repeats with adVNTR](https://genome.cshlp.org/content/28/11/1709). </b> Genome research vol. 28,11 (2018)
+## CLI reference — `advntr genotype`
+
+### Input/output options
+
+| Flag | Description |
+|------|-------------|
+| `-a/--alignment_file <file>` | Alignment file in SAM/BAM/CRAM format |
+| `-r/--reference_filename <file>` | Reference FASTA — required for CRAM, overrides path in CRAM header |
+| `-f/--fasta <file>` | Raw reads in FASTA format (not for alignment files) |
+| `-o/--outfile <file>` | Output file path. Defaults to stdout if not specified. |
+| `-of/--outfmt <format>` | Output format: `text`, `bed`, or `vcf` (default: `text`) |
+| `--disable_logging` | Suppress log file output except critical errors |
+
+### Algorithm options
+
+| Flag | Description |
+|------|-------------|
+| `-p/--pacbio` | Input contains PacBio reads |
+| `-n/--nanopore` | Input contains Nanopore MinION reads |
+| `--accuracy_filter` | Genotype using spanning reads only (higher precision, more `None` calls) |
+| `-e/--expansion` | Detect long expansions from PCR-free data (requires `-c/--coverage`) |
+| `-c/--coverage <float>` | Average sequencing coverage for expansion detection |
+| `--haploid` | Organism is haploid |
+| `-fs/--frameshift` | Search for frameshifts instead of copy number. Supported VNTR IDs: 25561, 519759 |
+| `-naive/--naive` | Use naive approach for PacBio reads |
+| `-u/--update` | Iteratively update the VNTR model |
+
+### Other options
+
+| Flag | Description |
+|------|-------------|
+| `--working_directory <path>` | Directory for temporary files (log, intermediate FASTA, filtered reads) |
+| `-m/--models <file>` | VNTR models database (default: `vntr_data/hg19_selected_VNTRs_Illumina.db`) |
+| `-t/--threads <int>` | Number of threads (default: 1). **Note: only affects PacBio mode — Illumina genotyping is single-threaded regardless of this value.** |
+| `-vid/--vntr_id <text>` | Comma-separated list of VNTR IDs to genotype. Runs all loci in the database if not specified. |
+
+---
+
+## Output formats
+
+### `text` (default)
+Tab-separated lines, one per locus:
+```
+VID     Chromosome  NumberOfSupportingReads  MeanCoverage  Genotype
+201     chr1        30                       28.5          2/2
+```
+
+### `vcf`
+Standard VCF 4.1 with a header block. Each record encodes the VNTR genotype in the `RU` INFO field (repeat unit count).
+
+### `bed`
+BED-format coordinates with genotype appended as extra columns.
+
+---
+
+## Working directory contents
+
+After a run, the working directory contains:
+
+| File | Description |
+|------|-------------|
+| `log_<sample>.log` | Detailed per-locus log. See `docs/README_log_format.md` for a full description of every message type. |
+| `<sample>.unmapped.fasta` | Unmapped reads extracted from the alignment file |
+| `keywords_<sample>.unmapped.fasta.txt` | Keyword index used for read pre-filtering |
+| `filtering_out_<sample>.unmapped.fasta.txt` | Filtered read IDs per locus |
+
+---
+
+## Performance notes
+
+- **Illumina, all loci (~10k):** ~4 hours on a single core for a 30× CRAM
+- **Per-locus breakdown:** ~15 min unmapped read extraction, ~90 sec keyword filtering, then ~1 sec/locus HMM genotyping
+- **Threads (`-t`)** only speed up PacBio mode; increasing thread count does not reduce Illumina runtime
+- Memory usage is modest (~4–8 GB for a 30× genome)
+
+---
+
+## Running on a SLURM cluster
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=advntr_sample
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=32G
+#SBATCH --time=08:00:00
+#SBATCH --output=/path/to/output/advntr_%j.out
+#SBATCH --error=/path/to/output/advntr_%j.err
+
+ADVNTR_SRC="/path/to/adVNTR"
+
+source /path/to/conda/etc/profile.d/conda.sh
+conda activate advntr_env
+
+PYTHONPATH="$ADVNTR_SRC" python -m advntr genotype \
+    --alignment_file sample.cram \
+    --reference_filename /path/to/GRCh38.fa \
+    --models /path/to/hg38_selected_VNTRs_Illumina.db \
+    --working_directory ./working_dir/ \
+    --outfile results.vcf \
+    --outfmt vcf
+```
+
+> Use `--ntasks=1 --cpus-per-task=<N>` (not `--ntasks=<N>`) for threaded jobs.
+> The `--output` and `--error` log directories must exist **before** `sbatch` is called.
+
+---
+
+## Citation
+
+- **Original adVNTR:**
+  Bakhtiari et al. [Targeted genotyping of variable number tandem repeats with adVNTR](https://genome.cshlp.org/content/28/11/1709). *Genome Research* 28(11), 2018.
+
+- **adVNTR-NN (v1.4.0):**
+  Bakhtiari et al. [Variable Number Tandem Repeats mediate the expression of proximal genes](https://doi.org/10.1038/s41467-021-22206-z). *Nature Communications* 12, 2075, 2021.
+
+- **code-adVNTR:**
+  Park et al. [Detecting tandem repeat variants in coding regions using code-adVNTR](https://doi.org/10.1016/j.isci.2022.104785). *iScience* 25(8), 104785, 2022.
